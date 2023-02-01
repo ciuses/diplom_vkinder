@@ -2,7 +2,8 @@ import requests
 from token_other import vk_access_token as vk_token
 from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
-#
+
+
 # class VK:
 #
 #    def __init__(self, access_token, user_id, version='5.131'):
@@ -16,15 +17,15 @@ from token_other import vk_token_soc as token_soc
 #        params = {'user_ids': self.id}
 #        response = requests.get(url, params={**self.params, **params})
 #        return response.json()
-
-
+#
+#
 # access_token = vk_token
 # user_id = vk_id
 # vk = VK(access_token, user_id)
 # print(vk.users_info())
 
 # url = 'https://api.vk.com/method/users.get'
-# par = {'access_token': vk_token, 'user_ids': vk_id, 'v': '5.131'}
+# par = {'access_token': token_soc, 'user_ids': vk_id, 'v': '5.131'}
 # resp = requests.get(url, params=par)
 # print(resp, resp.text)
 
@@ -35,21 +36,26 @@ from token_other import vk_token_soc as token_soc
 
 
 url = 'https://api.vk.com/method/messages.getLongPollServer'
-par = {'access_token': token_soc, 'v': '5.131'}
-resp = requests.get(url, params=par)
-data_dict = resp.json()['response']
+data_dict = requests.get(url, params={'access_token': token_soc, 'v': '5.131'}).json()
 # print(data_dict)
 
-serv = data_dict['server']
-key = data_dict['key']
-ts_number = data_dict['ts']
+serv = data_dict['response']['server']
+key = data_dict['response']['key']
+ts_number = data_dict['response']['ts']
 
 # print(serv, key, ts_number)
 
-url_lp = f'https://{serv}?act=a_check&key={key}&ts={ts_number}&wait=30&mode=2&version=2'
+while True:
 
-resp2 = requests.get(url_lp)
-print(resp2, resp2.text)
+    url_lp = f'https://{serv}?act=a_check&key={key}&ts={ts_number}&wait=90&mode=2&version=2'
+    resp2 = requests.get(url_lp).json()
+    udp = resp2['updates']
+    if udp and udp[0][0] == 4: # 4 - событие текст
+        # print(udp[0]) # [4, 18, 532481, 2000000001, 1675240870, 'sjtjtjtajtajt', {'from': '7385081'}]
+        print(udp[0][5])
+        print(udp[0][6]['from'])
+
+    ts_number = resp2['ts']
 
 
 
