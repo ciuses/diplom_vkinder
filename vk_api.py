@@ -6,36 +6,6 @@ from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
 
 
-# class VK:
-#
-#    def __init__(self, access_token, user_id, version='5.131'):
-#        self.token = access_token
-#        self.id = user_id
-#        self.version = version
-#        self.params = {'access_token': self.token, 'v': self.version}
-#
-#    def users_info(self):
-#        url = 'https://api.vk.com/method/users.get'
-#        params = {'user_ids': self.id}
-#        response = requests.get(url, params={**self.params, **params})
-#        return response.json()
-#
-#
-# access_token = vk_token
-# user_id = vk_id
-# vk = VK(access_token, user_id)
-# print(vk.users_info())
-
-# url = 'https://api.vk.com/method/users.get'
-# par = {'access_token': token_soc, 'user_ids': vk_id, 'v': '5.131'}
-# resp = requests.get(url, params=par)
-# print(resp, resp.text)
-
-# url = 'https://api.vk.com/method/apps.get'
-# par = {'access_token': vk_token, 'v': '5.131', 'app_id': '51499873', 'extended': '1'}
-# resp = requests.get(url, params=par)
-# print(resp, resp.text)
-
 def chat_listener(token: str = token_soc):
     '''
     Принимает на вход токен, печатает то что пишут в чате
@@ -63,6 +33,9 @@ def chat_listener(token: str = token_soc):
 
 
 def chat_sender(token: str = token_soc, mesaga: str = 'hello'):
+    '''
+    Пишет в чат чё то
+    '''
     url = 'https://api.vk.com/method/messages.send'
     data_dict = requests.post(url, params={'access_token': token,
                                           'v': '5.131',
@@ -71,21 +44,46 @@ def chat_sender(token: str = token_soc, mesaga: str = 'hello'):
                                           'random_id': randrange(10 ** 7)}).json()
     print(data_dict)
 
-def get_user(token: str = token_soc, user: str = '7385081'):
+def get_user(token: str = vk_token, user: str = '7385081'):
+    '''
+    Берёт данные пользака из апи
+    sex, bdate, city, relation
+    '''
     url = 'https://api.vk.com/method/users.get'
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'about, '
-                                                                            'city, '
-                                                                            'sex, '
-                                                                            'bdate, '
-                                                                            'relation, '
-                                                                            'occupation, '
-                                                                            'quotes, '
-                                                                            'contacts'}
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'sex, bdate, city, relation'}
     resp = requests.get(url, params=par).json()
     print(resp)
+    print('bdate:', resp['response'][0]['bdate'])
+    print('city:', resp['response'][0]['city']['title'])
+    print('relation:', resp['response'][0]['relation'])
+    print('sex:', resp['response'][0]['sex'])
+
+
+def user_search(token: str = vk_token):
+    '''
+    Ищет пользователей контача по критериям
+    '''
+    url = 'https://api.vk.com/method/users.search'
+    par = {'access_token': token, 'v': '5.131',
+           'count': '10',
+           'hometown': 'Томск',
+           'sex': '1',
+           'status': '1',
+           'age_from': '18',
+           'age_to': '40',
+           'has_photo': '1',
+           'fields': 'bdate, career, contacts, interests, photo_100, universities'}
+
+    resp = requests.get(url, params=par).json()
+    return resp
+
+
 
 if __name__ == '__main__':
 
     # chat_listener()
     # chat_sender(mesaga='Дороу')
-    get_user()
+    # get_user()
+    my_d = user_search()
+    for dev in my_d['response']['items']:
+        print(dev)
