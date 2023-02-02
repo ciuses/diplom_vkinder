@@ -1,3 +1,5 @@
+from random import randrange
+
 import requests
 from token_other import vk_access_token as vk_token
 from token_other import vk_user_id as vk_id
@@ -52,6 +54,7 @@ def chat_listener(token: str = token_soc):
         resp2 = requests.get(url_lp).json()
         udp = resp2['updates']
         if udp and udp[0][0] == 4:  # 4 - событие текст
+            # yield (udp[0][6]['from'], udp[0][3])
             # print(udp[0]) # [4, 18, 532481, 2000000001, 1675240870, 'sjtjtjtajtajt', {'from': '7385081'}]
             print(udp[0][5])
             print(udp[0][6]['from'])
@@ -59,6 +62,30 @@ def chat_listener(token: str = token_soc):
         ts_number = resp2['ts']
 
 
+def chat_sender(token: str = token_soc, mesaga: str = 'hello'):
+    url = 'https://api.vk.com/method/messages.send'
+    data_dict = requests.post(url, params={'access_token': token,
+                                          'v': '5.131',
+                                          'peer_id': '2000000001',
+                                          'message': mesaga,
+                                          'random_id': randrange(10 ** 7)}).json()
+    print(data_dict)
+
+def get_user(token: str = token_soc, user: str = '7385081'):
+    url = 'https://api.vk.com/method/users.get'
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'about, '
+                                                                            'city, '
+                                                                            'sex, '
+                                                                            'bdate, '
+                                                                            'relation, '
+                                                                            'occupation, '
+                                                                            'quotes, '
+                                                                            'contacts'}
+    resp = requests.get(url, params=par).json()
+    print(resp)
+
 if __name__ == '__main__':
 
-    chat_listener()
+    # chat_listener()
+    # chat_sender(mesaga='Дороу')
+    get_user()
