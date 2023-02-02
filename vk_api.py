@@ -34,30 +34,31 @@ from token_other import vk_token_soc as token_soc
 # resp = requests.get(url, params=par)
 # print(resp, resp.text)
 
+def chat_listener(token: str = token_soc):
+    '''
+    Принимает на вход токен, печатает то что пишут в чате
+    '''
+    url = 'https://api.vk.com/method/messages.getLongPollServer'
+    data_dict = requests.get(url, params={'access_token': token, 'v': '5.131'}).json()
+    # print(data_dict)
+    serv = data_dict['response']['server']
+    key = data_dict['response']['key']
+    ts_number = data_dict['response']['ts']
+    # print(serv, key, ts_number)
 
-url = 'https://api.vk.com/method/messages.getLongPollServer'
-data_dict = requests.get(url, params={'access_token': token_soc, 'v': '5.131'}).json()
-# print(data_dict)
+    while True:
 
-serv = data_dict['response']['server']
-key = data_dict['response']['key']
-ts_number = data_dict['response']['ts']
+        url_lp = f'https://{serv}?act=a_check&key={key}&ts={ts_number}&wait=90&mode=2&version=2'
+        resp2 = requests.get(url_lp).json()
+        udp = resp2['updates']
+        if udp and udp[0][0] == 4:  # 4 - событие текст
+            # print(udp[0]) # [4, 18, 532481, 2000000001, 1675240870, 'sjtjtjtajtajt', {'from': '7385081'}]
+            print(udp[0][5])
+            print(udp[0][6]['from'])
 
-# print(serv, key, ts_number)
-
-while True:
-
-    url_lp = f'https://{serv}?act=a_check&key={key}&ts={ts_number}&wait=90&mode=2&version=2'
-    resp2 = requests.get(url_lp).json()
-    udp = resp2['updates']
-    if udp and udp[0][0] == 4: # 4 - событие текст
-        # print(udp[0]) # [4, 18, 532481, 2000000001, 1675240870, 'sjtjtjtajtajt', {'from': '7385081'}]
-        print(udp[0][5])
-        print(udp[0][6]['from'])
-
-    ts_number = resp2['ts']
-
-
-
+        ts_number = resp2['ts']
 
 
+if __name__ == '__main__':
+
+    chat_listener()
