@@ -10,36 +10,29 @@ def chat_listener(token: str = token_soc):
     Принимает на вход токен, печатает то что пишут в чате
     '''
     url = 'https://api.vk.com/method/messages.getLongPollServer'
-    data_dict = requests.get(url, params={'access_token': token, 'v': '5.131'}).json()
+    data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
     # print(data_dict)
-    serv = data_dict['response']['server']
-    key = data_dict['response']['key']
     ts_number = data_dict['response']['ts']
     # print(serv, key, ts_number)
 
     while True:
 
-        url_lp = f'https://{serv}?act=a_check&key={key}&ts={ts_number}&wait=90&mode=2&version=2'
+        url_lp = f"https://{data_dict['response']['server']}?act=a_check&" \
+                 f"key={data_dict['response']['key']}&" \
+                 f"ts={ts_number}&wait=13&mode=2&version=3"
         resp2 = requests.get(url_lp).json()
-        # ts_number = resp2['ts']
-        # udp = resp2['updates']
-        if resp2['updates'] and resp2['updates'][0][0] == 4:  # 4 - событие текст
-            # yield (udp[0][6]['from'], udp[0][3])
-            # print(udp[0]) # [4, 18, 532481, 2000000001, 1675240870, 'sjtjtjtajtajt', {'from': '7385081'}]
-            # print(resp2['updates'][0][5])
-            # print(resp2['updates'][0][6]['from'])
-            chat_sender(chat_id=resp2['updates'][0][3],
-                        mesaga=f"Привет, {get_user_first_name(user=resp2['updates'][0][6]['from'])}")
-            # resp3 = requests.get(url_lp).json()
-            # print(resp3)
+        print(resp2)
 
-        if resp2['updates'] \
-                and resp2['updates'][0][0] == 4 \
-                and resp2['updates'][0][5].lower() \
-                in ['найди пару', 'пару', 'подругу']:
+        if resp2['updates']:
 
-            chat_sender(chat_id=resp2['updates'][0][3],
-                        mesaga=f"{get_user_first_name(user=resp2['updates'][0][6]['from'])} какую тебе?")
+            for my_list in resp2['updates']:
+
+                if my_list[0] == 4 and my_list[5].lower() in ['найди пару', 'пару', 'подругу']:
+                    chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} какую тебе?")
+
+                elif my_list[0] == 4 and my_list[5].lower() in ['красивую']:
+                    chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
+
 
 
 
@@ -80,8 +73,6 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     par = {'access_token': token, 'v': '5.131', 'user_ids': user}
     resp = requests.get(url, params=par).json()
     return resp['response'][0]['first_name']
-
-
 
 def user_search(token: str = vk_token):
     '''
