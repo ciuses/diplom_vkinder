@@ -1,3 +1,5 @@
+import time
+
 import requests
 from random import randrange
 from token_other import vk_access_token as vk_token
@@ -41,12 +43,11 @@ def chat_listener(token: str = token_soc):
                 elif my_list[0] == 4 and my_list[5].startswith('Пол:'):
                     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
                     mu_list = my_list[5].split('<br>')
-                    print(mu_list)
-                    print(mu_list[0][-1]) # пол
-                    print(mu_list[1][-2:]) # возраст
-                    print(mu_list[2][7:]) # город
-
-
+                    # print(mu_list)
+                    # print(mu_list[0][-1]) # пол
+                    # print(mu_list[1][-2:]) # возраст
+                    # print(mu_list[2][7:]) # город
+                    print(user_search(mu_list[1][-2:], mu_list[2][7:]))
 
 
         ts_number = resp2['ts']
@@ -70,13 +71,10 @@ def get_user(token: str = vk_token, user: str = '7385081'):
     sex, bdate, city, relation
     '''
     url = 'https://api.vk.com/method/users.get'
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'sex, bdate, city, relation'}
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'photo_id, photo_400_orig'} # 'sex, bdate, city, relation'
     resp = requests.get(url, params=par).json()
-    print(resp)
-    print('bdate:', resp['response'][0]['bdate'])
-    print('city:', resp['response'][0]['city']['title'])
-    print('relation:', resp['response'][0]['relation'])
-    print('sex:', resp['response'][0]['sex'])
+
+    return resp
 
 def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     '''
@@ -87,31 +85,91 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     resp = requests.get(url, params=par).json()
     return resp['response'][0]['first_name']
 
-def user_search(token: str = vk_token):
+def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> list:
     '''
     Ищет пользователей контача по критериям
+    'bdate, career, contacts, interests, photo_100, universities'
     '''
     url = 'https://api.vk.com/method/users.search'
     par = {'access_token': token, 'v': '5.131',
-           'count': '20',
-           'hometown': 'Томск',
-           'sex': '1',
+           'count': '10', # 1000
+           'hometown': city,
+           'sex': sex, # 1- дев, 2 - муж
            'status': '1',
-           'age_from': '18',
-           'age_to': '40',
-           'has_photo': '1',
-           'fields': 'bdate, career, contacts, interests, photo_100, universities'}
+           'age_from': age,
+           'age_to': age,
+           'relation': '6', # 0, 1, 5, 6
+           'has_photo': '1'}
+           #'fields': 'photo_100'}
 
     resp = requests.get(url, params=par).json()
+    # print(resp)
+    # return resp
+    # return [(str_data['id'], str_data['first_name'], str_data['last_name']) for str_data in resp['response']['items']]
+    return [str_data['id'] for str_data in resp['response']['items']]
+
+
+def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
+    '''
+    Функция запоса аватарки
+    :param user: юзер айди
+    :param token: токен
+    :param album: альбом по дифолту, фотки профиля
+    :return: джейсона
+    '''
+    url = 'https://api.vk.com/method/photos.get'
+    par = {'access_token': token, 'v': '5.131', 'owner_id': user, 'album_id': album, 'extended': 1, 'photo_sizes': 1}  # Фото профиля
+    resp = requests.get(url, params=par).json()
     return resp
+
+def data_constructor(my_list: list) -> dict:
+
+    like_comment_photo = {}
+    print(len(my_list))
+
+    for id_user in my_list:
+        like_comment_photo[id_user] = []
+        my_dict = photo_info(id_user)
+        # print(my_dict)
+        if 'response' in my_dict:
+            # print(my_dict['response']['count'])
+            # print(id_user)
+            for item in my_dict['response']['items']:
+                # print(f"likes-{item['likes']['count']} comments-{item['comments']['count']}", item['sizes'][-1]['url'])
+                like_comment_photo[id_user].append({'likes': item['likes']['count'],
+                                                    'comments': item['comments']['count'],
+                                                    'link': item['sizes'][-1]['url']})
+
+            time.sleep(1)
+
+        else:
+            print(id_user, 'Профиль запривачен')
+
+    return like_comment_photo
 
 
 if __name__ == '__main__':
 
-    chat_listener()
+
+    '''Чат'''
+    # chat_listener()
     # chat_sender(mesaga='Дороу')
+    '''Данные юзера'''
     # get_user()
-    # my_d = user_search()
-    # for dev in my_d['response']['items']:
-    #     print(dev)
     # print(get_user_first_name())
+    '''Поиск юзеров по критериям'''
+    # my_d = user_search('20', 'Томск')
+    # for dev in my_d['response']['items']:
+    #     # print(dev)
+    #     print(dev['id'], dev['first_name'], dev['last_name'])
+    # for id_fname_lname in my_d:
+    #     print(id_fname_lname)
+    # for my_id in my_d:
+    #     print(get_user(user=my_id))
+    #     time.sleep(1)
+    '''Данные про фотки'''
+    # print(photo_info('240188532'))
+    # print(photo_info('779690380'))
+    '''Получить структуру данных'''
+    for k, v in data_constructor(user_search('27', 'Томск')).items():
+        print(k, len(v), v)
