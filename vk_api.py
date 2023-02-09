@@ -1,5 +1,4 @@
 import time
-
 import requests
 from random import randrange
 from token_other import vk_access_token as vk_token
@@ -156,6 +155,42 @@ def data_constructor(my_list: list) -> dict:
     return like_comment_photo
 
 
+def top_three(any_dict):
+    topchik_likes = {}
+    topchik_comments = {}
+
+    for user, lk_com_li in any_dict.items():
+        # print(user, lk_com_li)
+        topchik_likes[user] = []
+        topchik_comments[user] = []
+
+        for like_dict in lk_com_li:
+            # l.append(like_dict['likes'])
+            topchik_likes[user].append(like_dict['likes'])
+            topchik_comments[user].append(like_dict['comments'])
+
+        # print(user, max(l), l)
+    # print(topchik_likes)
+    # print(topchik_likes.values())
+    # print(max(topchik_likes.get(138103064)))
+
+    for user, lk_com_li in any_dict.items():
+        for like_dict in lk_com_li:
+            if like_dict['likes'] == max(topchik_likes.get(user)):
+
+                print(like_dict)
+
+    # for user, lk_com_li in any_dict.items():
+    #     for like_dict in lk_com_li:
+    #         if like_dict['comments'] == max(topchik_comments.get(user)):
+
+                # print(like_dict)
+
+    # print(topchik_likes)
+    # print(topchik_comments)
+
+
+
 if __name__ == '__main__':
 
     '''Чат'''
@@ -178,5 +213,11 @@ if __name__ == '__main__':
     # print(photo_info('240188532'))
     # print(photo_info('779690380'))
     '''Получить структуру данных'''
-    for k, v in data_constructor(user_search('27', 'Томск')).items():
-        print(k, len(v), v)
+    # for k, v in data_constructor(user_search('27', 'Томск')).items():
+    #     print(k, len(v), v)
+    di = data_constructor(user_search('27', 'Томск'))
+    top_three(di)
+
+
+
+
