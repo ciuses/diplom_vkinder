@@ -49,7 +49,6 @@ def chat_listener(token: str = token_soc):
                     # print(mu_list[2][7:]) # город
                     print(user_search(mu_list[1][-2:], mu_list[2][7:]))
 
-
         ts_number = resp2['ts']
 
 
@@ -59,11 +58,12 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     '''
     url = 'https://api.vk.com/method/messages.send'
     data_dict = requests.post(url, params={'access_token': token,
-                                          'v': '5.131',
-                                          'peer_id': chat_id,
-                                          'message': mesaga,
-                                          'random_id': randrange(10 ** 7)}).json()
+                                           'v': '5.131',
+                                           'peer_id': chat_id,
+                                           'message': mesaga,
+                                           'random_id': randrange(10 ** 7)}).json()
     # print(data_dict)
+
 
 def get_user(token: str = vk_token, user: str = '7385081'):
     '''
@@ -71,10 +71,12 @@ def get_user(token: str = vk_token, user: str = '7385081'):
     sex, bdate, city, relation
     '''
     url = 'https://api.vk.com/method/users.get'
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'photo_id, photo_400_orig'} # 'sex, bdate, city, relation'
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user,
+           'fields': 'photo_id, photo_400_orig'}  # 'sex, bdate, city, relation'
     resp = requests.get(url, params=par).json()
 
     return resp
+
 
 def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     '''
@@ -85,6 +87,7 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     resp = requests.get(url, params=par).json()
     return resp['response'][0]['first_name']
 
+
 def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> list:
     '''
     Ищет пользователей контача по критериям
@@ -92,15 +95,15 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> l
     '''
     url = 'https://api.vk.com/method/users.search'
     par = {'access_token': token, 'v': '5.131',
-           'count': '10', # 1000
+           'count': '10',  # 1000
            'hometown': city,
-           'sex': sex, # 1- дев, 2 - муж
+           'sex': sex,  # 1- дев, 2 - муж
            'status': '1',
            'age_from': age,
            'age_to': age,
-           'relation': '6', # 0, 1, 5, 6
+           'relation': '6',  # 0, 1, 5, 6
            'has_photo': '1'}
-           #'fields': 'photo_100'}
+    # 'fields': 'photo_100'}
 
     resp = requests.get(url, params=par).json()
     # print(resp)
@@ -118,12 +121,17 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     :return: джейсона
     '''
     url = 'https://api.vk.com/method/photos.get'
-    par = {'access_token': token, 'v': '5.131', 'owner_id': user, 'album_id': album, 'extended': 1, 'photo_sizes': 1}  # Фото профиля
+    par = {'access_token': token,
+           'v': '5.131',
+           'owner_id': user,
+           'album_id': album,
+           'extended': 1,
+           'photo_sizes': 1}  # Фото профиля
     resp = requests.get(url, params=par).json()
     return resp
 
-def data_constructor(my_list: list) -> dict:
 
+def data_constructor(my_list: list) -> dict:
     like_comment_photo = {}
     print(len(my_list))
 
@@ -149,7 +157,6 @@ def data_constructor(my_list: list) -> dict:
 
 
 if __name__ == '__main__':
-
 
     '''Чат'''
     # chat_listener()
