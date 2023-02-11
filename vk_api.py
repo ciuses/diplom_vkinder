@@ -4,7 +4,7 @@ from random import randrange
 from token_other import vk_access_token as vk_token
 from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
-
+from operator import itemgetter
 
 def chat_listener(token: str = token_soc):
     '''
@@ -127,37 +127,54 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
            'extended': 1,
            'photo_sizes': 1}  # Фото профиля
     resp = requests.get(url, params=par).json()
-    return resp
+    # print(resp)
+
+    if resp.get('response'):
+        return resp
+    # elif resp.get('error'):
+    #     print(resp.get('error').get('error_msg'))
+        # return {user: resp.get('error').get('error_msg')}
+    # else:
+    #     print(user, resp)
+
+
 
 
 def data_constructor(my_list: list) -> dict:
+    '''
+    :param my_list: [606233587, 44151122, 138103064]
+    :return:
+    {606233587: [{'likes': 93, 'comments': 3, 'link': 'https://'}],
+    44151122: [{'likes': 133, 'comments': 3, 'link': 'https://'},
+                {'likes': 153, 'comments': 1, 'link': 'https://'}],
+    138103064: [{'likes': 84, 'comments': 0, 'link': 'https://'}]}
+    '''
     like_comment_photo = {}
-    print(len(my_list))
+    # print(len(my_list))
 
     for id_user in my_list:
-        like_comment_photo[id_user] = []
         my_dict = photo_info(id_user)
-        # print(my_dict)
-        if 'response' in my_dict:
-            # print(my_dict['response']['count'])
-            # print(id_user)
+        # print(id_user, my_dict)
+
+        if my_dict:
+            like_comment_photo[id_user] = []
             for item in my_dict['response']['items']:
                 # print(f"likes-{item['likes']['count']} comments-{item['comments']['count']}", item['sizes'][-1]['url'])
                 like_comment_photo[id_user].append({'likes': item['likes']['count'],
                                                     'comments': item['comments']['count'],
                                                     'link': item['sizes'][-1]['url']})
 
-            time.sleep(1)
-
         else:
-            print(id_user, 'Профиль запривачен')
+            print(id_user, my_dict)
+
+        time.sleep(1)
 
     return like_comment_photo
 
 
 def top_three(any_dict):
-    topchik_likes = {}
-    topchik_comments = {}
+    topchik_likes = {} # нужны для определения самой залайканой фотки
+    topchik_comments = {} # нужны для определения самой закоменчиной фотки
 
     for user, lk_com_li in any_dict.items():
         # print(user, lk_com_li)
@@ -178,16 +195,32 @@ def top_three(any_dict):
         for like_dict in lk_com_li:
             if like_dict['likes'] == max(topchik_likes.get(user)):
 
-                print(like_dict)
+                # print(f'У юзера {user} сумма лайков -> {sum(topchik_likes.get(user))}')
+                print(user, like_dict)
 
     # for user, lk_com_li in any_dict.items():
     #     for like_dict in lk_com_li:
     #         if like_dict['comments'] == max(topchik_comments.get(user)):
 
                 # print(like_dict)
-
     # print(topchik_likes)
     # print(topchik_comments)
+
+
+def top_three_v2(any_dict):
+    list_top = []
+    for user, lk_com_li in any_dict.items():
+        sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'))
+        if sorted_list_of_dicts:
+
+            # print(user, sorted_list_of_dicts[-1])
+            list_top.append({user: sorted_list_of_dicts[-1]})
+        else:
+            print(user, sorted_list_of_dicts)
+
+    # list_top_sorted = sorted(list_top, key=itemgetter('likes'))
+    return list_top
+    # return list_top_sorted
 
 
 
@@ -212,12 +245,22 @@ if __name__ == '__main__':
     '''Данные про фотки'''
     # print(photo_info('240188532'))
     # print(photo_info('779690380'))
+    # print(photo_info('136412187'))
     '''Получить структуру данных'''
-    # for k, v in data_constructor(user_search('27', 'Томск')).items():
+    # print(data_constructor(user_search('27', 'Томск')))
+    # for k, v in data_constructor(user_search('23', 'Томск')).items():
     #     print(k, len(v), v)
-    di = data_constructor(user_search('27', 'Томск'))
-    top_three(di)
+    # di = data_constructor(user_search('27', 'Томск'))
+    # top_three(di)
+    # print('#' * 120)
+    # top_three_v2(data_constructor(user_search('23', 'Томск')))
+    for row in top_three_v2(data_constructor(user_search('23', 'Томск'))):
+        print(row)
 
+    '''дебаг '''
+    # for u_id in user_search('23', 'Томск'):
+    #     print(photo_info(u_id))
+    #     time.sleep(1)
 
 
 
