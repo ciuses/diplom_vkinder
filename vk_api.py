@@ -129,7 +129,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     resp = requests.get(url, params=par).json()
     # print(resp)
 
-    if resp.get('response'):
+    if resp.get('response') and len(resp.get('response').get('items')) > 0:
         return resp
     # elif resp.get('error'):
     #     print(resp.get('error').get('error_msg'))
@@ -206,13 +206,30 @@ def top_three(any_dict):
 
 
 def top_three_v2(my_struct_dict: dict):
-    top_list = []
+    top_dict = {}
+    sorter_top_dict = {}
     for user_id, lk_com_li in my_struct_dict.items():
         # print(user_id, lk_com_li)
         sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'))
-        top_list.append({user_id: sorted_list_of_dicts[-1]})
+        top_dict[user_id] = sorted_list_of_dicts[-1]
 
-    return top_list
+    li_la = sorted([v['likes'] for k, v in top_dict.items()])
+    # print(li_la)
+
+    for user_id, l_dict in top_dict.items():
+        # if l_dict['likes'] == max(li_la):
+        #     print('----->', user_id, l_dict)
+        if l_dict['likes'] == li_la[-1]:
+            print('----->', user_id, l_dict)
+        elif l_dict['likes'] == li_la[-2]:
+            print('----->', user_id, l_dict)
+        elif l_dict['likes'] == li_la[-3]:
+            print('----->', user_id, l_dict)
+
+
+    return top_dict
+
+
 
 
 
@@ -238,7 +255,8 @@ if __name__ == '__main__':
     '''Данные про фотки'''
     # print(photo_info('240188532'))
     # print(photo_info('779690380'))
-    # print(photo_info('136412187'))
+    # print(get_user(user='65515441'))
+    # print(photo_info('65515441'))
     '''Получить структуру данных'''
     # print(data_constructor(user_search('27', 'Томск')))
     # for k, v in data_constructor(user_search('23', 'Томск')).items():
@@ -247,11 +265,11 @@ if __name__ == '__main__':
     # top_three(di)
     # print('#' * 120)
     # print(top_three_v2(data_constructor(user_search('23', 'Томск'))))
-    for row in top_three_v2(data_constructor(user_search('23', 'Томск'))):
-        print(row)
+    for u_id, m_di in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
+        print(u_id, m_di)
 
     '''дебаг '''
-    # for u_id in user_search('23', 'Томск'):
+    # for u_id in user_search('34', 'Томск'):
     #     print(photo_info(u_id))
     #     time.sleep(1)
 
