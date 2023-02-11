@@ -140,9 +140,9 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
 
 
 
-def data_constructor(my_list: list) -> dict:
+def data_constructor(list_of_user_id: list) -> dict:
     '''
-    :param my_list: [606233587, 44151122, 138103064]
+    :param list_of_user_id: [606233587, 44151122, 138103064]
     :return:
     {606233587: [{'likes': 93, 'comments': 3, 'link': 'https://'}],
     44151122: [{'likes': 133, 'comments': 3, 'link': 'https://'},
@@ -150,22 +150,20 @@ def data_constructor(my_list: list) -> dict:
     138103064: [{'likes': 84, 'comments': 0, 'link': 'https://'}]}
     '''
     like_comment_photo = {}
-    # print(len(my_list))
 
-    for id_user in my_list:
-        my_dict = photo_info(id_user)
+    for user_id in list_of_user_id:
+        response_dict = photo_info(user_id)
         # print(id_user, my_dict)
 
-        if my_dict:
-            like_comment_photo[id_user] = []
-            for item in my_dict['response']['items']:
-                # print(f"likes-{item['likes']['count']} comments-{item['comments']['count']}", item['sizes'][-1]['url'])
-                like_comment_photo[id_user].append({'likes': item['likes']['count'],
+        if response_dict:
+            like_comment_photo[user_id] = []
+            for item in response_dict['response']['items']:
+                like_comment_photo[user_id].append({'likes': item['likes']['count'],
                                                     'comments': item['comments']['count'],
                                                     'link': item['sizes'][-1]['url']})
 
-        else:
-            print(id_user, my_dict)
+        # else:
+        #     print(id_user, my_dict)
 
         time.sleep(1)
 
@@ -207,20 +205,15 @@ def top_three(any_dict):
     # print(topchik_comments)
 
 
-def top_three_v2(any_dict):
-    list_top = []
-    for user, lk_com_li in any_dict.items():
+def top_three_v2(my_struct_dict: dict):
+    top_list = []
+    for user_id, lk_com_li in my_struct_dict.items():
+        # print(user_id, lk_com_li)
         sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'))
-        if sorted_list_of_dicts:
+        top_list.append({user_id: sorted_list_of_dicts[-1]})
 
-            # print(user, sorted_list_of_dicts[-1])
-            list_top.append({user: sorted_list_of_dicts[-1]})
-        else:
-            print(user, sorted_list_of_dicts)
+    return top_list
 
-    # list_top_sorted = sorted(list_top, key=itemgetter('likes'))
-    return list_top
-    # return list_top_sorted
 
 
 
@@ -253,7 +246,7 @@ if __name__ == '__main__':
     # di = data_constructor(user_search('27', 'Томск'))
     # top_three(di)
     # print('#' * 120)
-    # top_three_v2(data_constructor(user_search('23', 'Томск')))
+    # print(top_three_v2(data_constructor(user_search('23', 'Томск'))))
     for row in top_three_v2(data_constructor(user_search('23', 'Томск'))):
         print(row)
 
