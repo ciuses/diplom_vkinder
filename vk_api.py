@@ -94,7 +94,7 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> l
     '''
     url = 'https://api.vk.com/method/users.search'
     par = {'access_token': token, 'v': '5.131',
-           'count': '10',  # 1000
+           'count': '1000',  # 1000
            'hometown': city,
            'sex': sex,  # 1- дев, 2 - муж
            'status': '1',
@@ -127,7 +127,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
            'extended': 1,
            'photo_sizes': 1}  # Фото профиля
     resp = requests.get(url, params=par).json()
-    # print(resp)
+    # print(user, resp)
 
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
         return resp
@@ -165,7 +165,7 @@ def data_constructor(list_of_user_id: list) -> dict:
         # else:
         #     print(id_user, my_dict)
 
-        time.sleep(1)
+        time.sleep(0.5)
 
     return like_comment_photo
 
@@ -206,6 +206,11 @@ def top_three(any_dict):
 
 
 def top_three_v2(my_struct_dict: dict):
+    '''
+    :param my_struct_dict: словарь данных как в data_constructor()
+    :return: список тьюплов вида (346034388, {'likes': 4, 'comments': 0, 'link': 'https://}),
+                                (107342491, {'likes': 982, 'comments': 3, 'link': 'https://})
+    '''
     top_dict = {}
     sorter_top_dict = {}
     for user_id, lk_com_li in my_struct_dict.items():
@@ -218,6 +223,31 @@ def top_three_v2(my_struct_dict: dict):
     return list_of_tuples
 
 
+def sieve(list_of_user_id: list, token: str = vk_token) -> list:
+    '''
+    Чистит список юрез айди от приватных.
+    :param list_of_user_id: список юзеров
+    :return: чистый список
+    '''
+    clean_user_id = []
+    dirty_user_id = []
+
+    for user_id in list_of_user_id:
+        url = 'https://api.vk.com/method/users.get'
+        par = {'access_token': token, 'v': '5.131', 'user_ids': user_id}
+        resp = requests.get(url, params=par).json()
+        # print(resp)
+        # print(user_id, resp.get('response')[0].get('can_access_closed'))
+
+        if resp.get('response')[0].get('can_access_closed'):
+            clean_user_id.append(user_id)
+        else:
+            dirty_user_id.append(user_id)
+        time.sleep(0.5)
+
+    # print(clean_user_id)
+    # print(dirty_user_id)
+    return clean_user_id
 
 
 
@@ -230,6 +260,7 @@ if __name__ == '__main__':
     '''Данные юзера'''
     # get_user()
     # print(get_user_first_name())
+    # print(sieve(['346034388', '107342491', '65515441', '134989778', '136412187', '473433452']))
     '''Поиск юзеров по критериям'''
     # my_d = user_search('20', 'Томск')
     # for dev in my_d['response']['items']:
@@ -256,7 +287,7 @@ if __name__ == '__main__':
     # for u_id, m_di in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
     #     print(u_id, m_di)
 
-    for tu in top_three_v2(data_constructor(user_search('23', 'Томск'))): # можно срезать 3 первых - [:3]
+    for tu in top_three_v2(data_constructor(sieve(user_search('28', 'Томск')))): # можно срезать 3 первых - [:3]
         print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
