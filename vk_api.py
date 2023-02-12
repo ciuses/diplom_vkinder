@@ -2,6 +2,7 @@ import time
 import requests
 from random import randrange
 from token_other import vk_access_token as vk_token
+from token_other import bearer_token as b_token
 from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
@@ -65,15 +66,14 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     # print(data_dict)
 
 
-def get_user(token: str = vk_token, user: str = '7385081'):
+def get_user(user: str = '7385081'):
     '''
-    Берёт данные пользака из апи
-    sex, bdate, city, relation
+
     '''
     url = 'https://api.vk.com/method/users.get'
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user,
-           'fields': 'photo_id, photo_400_orig'}  # 'sex, bdate, city, relation'
-    resp = requests.get(url, params=par).json()
+    head = {'Authorization': f'Bearer {b_token}'}
+    par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate'}
+    resp = requests.get(url, params=par, headers=head).json()
 
     return resp
 
@@ -254,8 +254,11 @@ if __name__ == '__main__':
     # chat_listener()
     # chat_sender(mesaga='Дороу')
     '''Данные юзера'''
-    # get_user()
-    # print(get_user_first_name())
+    # print(get_user(user='93600308'))
+    # print(get_user(user='111189286'))
+    # print(get_user(user='763845157'))
+    # print(photo_info('93600308'))
+    # print(get_user_first_name('93600308'))
     # print(sieve(['346034388', '107342491', '65515441', '134989778', '136412187', '473433452']))
     '''Поиск юзеров по критериям'''
     # my_d = user_search('20', 'Томск')
