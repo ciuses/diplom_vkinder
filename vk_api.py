@@ -6,6 +6,7 @@ from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
 
+
 def chat_listener(token: str = token_soc):
     '''
     Принимает на вход токен, печатает то что пишут в чате
@@ -133,11 +134,9 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
         return resp
     # elif resp.get('error'):
     #     print(resp.get('error').get('error_msg'))
-        # return {user: resp.get('error').get('error_msg')}
+    # return {user: resp.get('error').get('error_msg')}
     # else:
     #     print(user, resp)
-
-
 
 
 def data_constructor(list_of_user_id: list) -> dict:
@@ -171,8 +170,8 @@ def data_constructor(list_of_user_id: list) -> dict:
 
 
 def top_three(any_dict):
-    topchik_likes = {} # нужны для определения самой залайканой фотки
-    topchik_comments = {} # нужны для определения самой закоменчиной фотки
+    topchik_likes = {}  # нужны для определения самой залайканой фотки
+    topchik_comments = {}  # нужны для определения самой закоменчиной фотки
 
     for user, lk_com_li in any_dict.items():
         # print(user, lk_com_li)
@@ -192,7 +191,6 @@ def top_three(any_dict):
     for user, lk_com_li in any_dict.items():
         for like_dict in lk_com_li:
             if like_dict['likes'] == max(topchik_likes.get(user)):
-
                 # print(f'У юзера {user} сумма лайков -> {sum(topchik_likes.get(user))}')
                 print(user, like_dict)
 
@@ -200,7 +198,7 @@ def top_three(any_dict):
     #     for like_dict in lk_com_li:
     #         if like_dict['comments'] == max(topchik_comments.get(user)):
 
-                # print(like_dict)
+    # print(like_dict)
     # print(topchik_likes)
     # print(topchik_comments)
 
@@ -245,11 +243,9 @@ def sieve(list_of_user_id: list, token: str = vk_token) -> list:
             dirty_user_id.append(user_id)
         time.sleep(0.5)
 
-    # print(clean_user_id)
-    # print(dirty_user_id)
+    # print(len(clean_user_id), clean_user_id)
+    # print(len(dirty_user_id), dirty_user_id)
     return clean_user_id
-
-
 
 
 if __name__ == '__main__':
@@ -287,7 +283,7 @@ if __name__ == '__main__':
     # for u_id, m_di in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
     #     print(u_id, m_di)
 
-    for tu in top_three_v2(data_constructor(sieve(user_search('28', 'Томск')))): # можно срезать 3 первых - [:3]
+    for tu in top_three_v2(data_constructor(sieve(user_search('28', 'Томск')))):  # можно срезать 3 первых - [:3]
         print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
@@ -295,6 +291,3 @@ if __name__ == '__main__':
     # for u_id in user_search('34', 'Томск'):
     #     print(photo_info(u_id))
     #     time.sleep(1)
-
-
-
