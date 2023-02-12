@@ -213,21 +213,9 @@ def top_three_v2(my_struct_dict: dict):
         sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'))
         top_dict[user_id] = sorted_list_of_dicts[-1]
 
-    li_la = sorted([v['likes'] for k, v in top_dict.items()])
-    # print(li_la)
+    list_of_tuples = sorted(top_dict.items(), key=lambda like: like[1].get('likes'), reverse=True)
 
-    for user_id, l_dict in top_dict.items():
-        # if l_dict['likes'] == max(li_la):
-        #     print('----->', user_id, l_dict)
-        if l_dict['likes'] == li_la[-1]:
-            print('----->', user_id, l_dict)
-        elif l_dict['likes'] == li_la[-2]:
-            print('----->', user_id, l_dict)
-        elif l_dict['likes'] == li_la[-3]:
-            print('----->', user_id, l_dict)
-
-
-    return top_dict
+    return list_of_tuples
 
 
 
@@ -265,8 +253,12 @@ if __name__ == '__main__':
     # top_three(di)
     # print('#' * 120)
     # print(top_three_v2(data_constructor(user_search('23', 'Томск'))))
-    for u_id, m_di in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
-        print(u_id, m_di)
+    # for u_id, m_di in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
+    #     print(u_id, m_di)
+
+    for tu in top_three_v2(data_constructor(user_search('23', 'Томск'))): # можно срезать 3 первых - [:3]
+        print(tu)
+    # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
     '''дебаг '''
     # for u_id in user_search('34', 'Томск'):
