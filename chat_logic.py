@@ -41,12 +41,20 @@ def chat_listener(token: str = token_soc):
                     # print(user_search(mu_list[1][-2:], mu_list[2][7:]))
                     persons = top_three_v2(data_constructor(user_search(age=mu_list[1][-2:], city=mu_list[2][7:])))
                     print(persons)
-                    for _, person in persons.items():
-                        print(person)
+                    for user_id, person in persons.items():
+                        # print(person)
+                        message1 = f"Профиль: https://vk.com/id{user_id}"
+                        chat_sender(mesaga=message1)
+                        long_string = ''
                         for p in person:
 
-                            message = f"Имя: {p['f_name']},\nФамилия: {p['l_name']},\nФотка: {p['link']}"
-                            chat_sender(mesaga=message)
+                            # message2 = f"Фотка: {p['link']}"
+                            # chat_sender(mesaga=message2)
+                            long_string += f"Фото: {p['link']}\n"
+
+                        print(long_string)
+
+                        chat_sender(mesaga=long_string)
 
 
 
