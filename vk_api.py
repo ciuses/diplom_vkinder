@@ -28,14 +28,15 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     return resp['response'][0]['first_name']
 
 
-def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> tuple:
+def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_num: str = None) -> tuple:
     '''
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
     '''
     url = 'https://api.vk.com/method/users.search'
     par = {'access_token': token, 'v': '5.131',
-           'count': '10',  # 1000
+           'count': '3',  # 1000
+           'offset': off_num,
            'hometown': city,
            'sex': sex,  # 1- дев, 2 - муж
            'status': '1',
@@ -46,13 +47,18 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> t
 
     resp = requests.get(url, params=par).json()
     # print(resp)
-    list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
-                     for str_data in resp['response']['items']
-                     if str_data['can_access_closed']]
+    if resp.get('response') and len(resp.get('response').get('items')) > 0:
 
-    black_list = [str_data['id']
-                  for str_data in resp['response']['items']
-                  if str_data['can_access_closed'] == False]
+        list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
+                         for str_data in resp['response']['items']
+                         if str_data['can_access_closed']]
+
+        black_list = [str_data['id']
+                      for str_data in resp['response']['items']
+                      if str_data['can_access_closed'] == False]
+
+    else:
+        return False
 
     return list_of_tupls, black_list
 
@@ -93,7 +99,7 @@ def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом дел
     138103064: [{'likes': 84, 'comments': 0, 'link': 'https://'}]}
     '''
     like_comment_photo = {}
-
+    # print(w_list_b_list_tupl)
     tuple_with_users = w_list_b_list_tupl[0]
     # print(list_with_users)
     for user_id, f_name, l_name in tuple_with_users:
@@ -251,9 +257,16 @@ if __name__ == '__main__':
 
     '''Сортировка'''
     # top_three_v2(data_constructor(user_search('20', 'Томск')))
-    for k, v in top_three_v2(data_constructor(user_search('20', 'Томск'))).items():
+    for k, v in top_three_v2(data_constructor(user_search('20', 'Новосибирск'))).items():
         print(k, len(v), v)
 
+    # off = 3
+    # while top_three_v2(data_constructor(user_search('20', 'Новосибирск', off_num=off))):
+    #     for k, v in top_three_v2(data_constructor(user_search('20', 'Новосибирск', off_num=off))).items():
+    #         print(k, len(v), v)
+    #     off += 3
+    #     print(off)
+    #     time.sleep(0.5)
 
     '''дебаг '''
     # for u_id in user_search('34', 'Томск'):

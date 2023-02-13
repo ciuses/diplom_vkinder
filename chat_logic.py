@@ -1,7 +1,7 @@
 import requests
 from random import randrange
 from token_other import vk_token_soc as token_soc
-from vk_api import get_user_first_name, user_search
+from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor
 
 
 def chat_listener(token: str = token_soc):
@@ -35,10 +35,22 @@ def chat_listener(token: str = token_soc):
                     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
                     mu_list = my_list[5].split('<br>')
                     print(mu_list)
-                    print(mu_list[0][-1]) # пол
-                    print(mu_list[1][-2:]) # возраст
-                    print(mu_list[2][7:]) # город
+                    # print(mu_list[0][-1]) # пол
+                    # print(mu_list[1][-2:]) # возраст
+                    # print(mu_list[2][7:]) # город
                     # print(user_search(mu_list[1][-2:], mu_list[2][7:]))
+                    persons = top_three_v2(data_constructor(user_search(age=mu_list[1][-2:], city=mu_list[2][7:])))
+                    print(persons)
+                    for _, person in persons.items():
+                        print(person)
+                        for p in person:
+
+                            message = f"Имя: {p['f_name']},\nФамилия: {p['l_name']},\nФотка: {p['link']}"
+                            chat_sender(mesaga=message)
+
+
+
+
 
         ts_number = resp2['ts']
 
