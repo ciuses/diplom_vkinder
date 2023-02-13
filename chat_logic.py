@@ -48,9 +48,7 @@ def chat_listener(token: str = token_soc):
                         long_string = ''
                         for p in person:
 
-                            # message2 = f"Фотка: {p['link']}"
-                            # chat_sender(mesaga=message2)
-                            long_string += f"Фото: {p['link']}\n"
+                            long_string += f"Фото {p['f_name']} {p['l_name']}: {p['link']}\n"
 
                         print(long_string)
 
