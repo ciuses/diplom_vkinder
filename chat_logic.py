@@ -1,6 +1,5 @@
-from random import randrange
-
 import requests
+from random import randrange
 from token_other import vk_token_soc as token_soc
 from vk_api import get_user_first_name, user_search
 
@@ -27,12 +26,6 @@ def chat_listener(token: str = token_soc):
 
             for my_list in resp2['updates']:
 
-                # if my_list[0] == 4 and my_list[5].lower() in ['найди пару', 'пару', 'подругу']:
-                #     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} какую тебе?")
-                #
-                # elif my_list[0] == 4 and my_list[5].lower() in ['красивую']:
-                #     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
-
                 if my_list[0] == 4 and my_list[5].lower() in ['найди пару', 'пару', 'подругу']:
                     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} "
                                                            f"укажи пол, возраст и город как показано в образце:\n"
@@ -41,11 +34,11 @@ def chat_listener(token: str = token_soc):
                 elif my_list[0] == 4 and my_list[5].startswith('Пол:'):
                     chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
                     mu_list = my_list[5].split('<br>')
-                    # print(mu_list)
-                    # print(mu_list[0][-1]) # пол
-                    # print(mu_list[1][-2:]) # возраст
-                    # print(mu_list[2][7:]) # город
-                    print(user_search(mu_list[1][-2:], mu_list[2][7:]))
+                    print(mu_list)
+                    print(mu_list[0][-1]) # пол
+                    print(mu_list[1][-2:]) # возраст
+                    print(mu_list[2][7:]) # город
+                    # print(user_search(mu_list[1][-2:], mu_list[2][7:]))
 
         ts_number = resp2['ts']
 
@@ -61,3 +54,7 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
                                            'message': mesaga,
                                            'random_id': randrange(10 ** 7)}).json()
     # print(data_dict)
+
+
+if __name__ == '__main__':
+    chat_listener()

@@ -2,7 +2,6 @@ import time
 import requests
 from token_other import vk_access_token as vk_token
 from token_other import bearer_token as b_token
-from token_other import vk_user_id as vk_id
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
 
@@ -29,7 +28,7 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     return resp['response'][0]['first_name']
 
 
-def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> list:
+def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> tuple:
     '''
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
@@ -44,19 +43,19 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1') -> l
            'age_to': age,
            'relation': '6',  # 0, 1, 5, 6
            'has_photo': '1'}
-    # 'fields': 'photo_100'}
 
     resp = requests.get(url, params=par).json()
     # print(resp)
-    # return resp
     list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
                      for str_data in resp['response']['items']
                      if str_data['can_access_closed']]
+
     black_list = [str_data['id']
                   for str_data in resp['response']['items']
                   if str_data['can_access_closed'] == False]
+
     return list_of_tupls, black_list
-    # return [str_data['id'] for str_data in resp['response']['items']]
+
 
 
 def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
@@ -79,16 +78,14 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
 
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
         return resp
-    # elif resp.get('error'):
-    #     print(resp.get('error').get('error_msg'))
-    # return {user: resp.get('error').get('error_msg')}
+
     # else:
     #     print(user, resp)
 
 
-def data_constructor(list_of_user_id: list) -> dict:
+def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом деле там тьюпл
     '''
-    :param list_of_user_id: [606233587, 44151122, 138103064]
+    :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
     :return:
     {606233587: [{'likes': 93, 'comments': 3, 'link': 'https://'}],
     44151122: [{'likes': 133, 'comments': 3, 'link': 'https://'},
@@ -97,9 +94,9 @@ def data_constructor(list_of_user_id: list) -> dict:
     '''
     like_comment_photo = {}
 
-    list_with_users = list_of_user_id[0]
+    tuple_with_users = w_list_b_list_tupl[0]
     # print(list_with_users)
-    for user_id, f_name, l_name in list_with_users:
+    for user_id, f_name, l_name in tuple_with_users:
         # print(user_id, f_name, l_name)
         response_dict = photo_info(user_id)
         # print(id_user, my_dict)
@@ -164,7 +161,6 @@ def top_three_v2(my_struct_dict: dict):
                                 (107342491, {'likes': 982, 'comments': 3, 'link': 'https://})
     '''
     top_dict = {}
-    sorter_top_dict = {}
     for user_id, lk_com_li in my_struct_dict.items():
         # print(user_id, lk_com_li)
         sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'), reverse=True)
@@ -173,11 +169,6 @@ def top_three_v2(my_struct_dict: dict):
             top_dict[user_id] = sorted_list_of_dicts[:3]
         else:
             top_dict[user_id] = sorted_list_of_dicts
-    #     top_dict[user_id] = sorted_list_of_dicts[-1]
-    #
-    # list_of_tuples = sorted(top_dict.items(), key=lambda like: like[1].get('likes'), reverse=True)
-    #
-    # return list_of_tuples
 
     return top_dict
 
