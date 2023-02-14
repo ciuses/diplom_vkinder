@@ -45,14 +45,9 @@ def chat_listener(token: str = token_soc):
                         # print(person)
                         message1 = f"Профиль: https://vk.com/id{user_id}"
                         chat_sender(mesaga=message1)
-                        long_string = ''
                         for p in person:
-
-                            long_string += f"Фото {p['f_name']} {p['l_name']}: {p['link']}\n"
-
-                        print(long_string)
-
-                        chat_sender(mesaga=long_string)
+                            chat_sender(mesaga=f"Фото {p['f_name']} {p['l_name']}:\n",
+                                        attach=f"photo{user_id}_{p['photo_id']}")
 
 
 
@@ -61,7 +56,7 @@ def chat_listener(token: str = token_soc):
         ts_number = resp2['ts']
 
 
-def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str = 'hello'):
+def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str = 'hello', attach: str = None):
     '''
     Пишет в чат чё то
     '''
@@ -70,6 +65,7 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
                                            'v': '5.131',
                                            'peer_id': chat_id,
                                            'message': mesaga,
+                                           'attachment': attach,
                                            'random_id': randrange(10 ** 7)}).json()
     # print(data_dict)
 

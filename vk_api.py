@@ -114,6 +114,7 @@ def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом дел
                                                     'comments': item['comments']['count'],
                                                     'f_name': f_name,
                                                     'l_name': l_name,
+                                                    'photo_id': item['id'],
                                                     'link': item['sizes'][-1]['url']})
 
         # else:
@@ -252,13 +253,13 @@ if __name__ == '__main__':
     #     print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
-    # for k, v in data_constructor(user_search('20', 'Томск')).items():
-    #     print(k, len(v), v)
+    for k, v in data_constructor(user_search('20', 'Томск')).items():
+        print(k, len(v), v)
 
     '''Сортировка'''
     # top_three_v2(data_constructor(user_search('20', 'Томск')))
-    for k, v in top_three_v2(data_constructor(user_search('20', 'Новосибирск'))).items():
-        print(k, len(v), v)
+    # for k, v in top_three_v2(data_constructor(user_search('20', 'Новосибирск'))).items():
+    #     print(k, len(v), v)
 
     # off = 3
     # while top_three_v2(data_constructor(user_search('20', 'Новосибирск', off_num=off))):
