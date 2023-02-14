@@ -13,6 +13,7 @@ def chat_listener(token: str = token_soc):
     # print(data_dict)
     ts_number = data_dict['response']['ts']
     # print(serv, key, ts_number)
+    gender = None
 
     while True:
 
@@ -22,25 +23,35 @@ def chat_listener(token: str = token_soc):
         resp2 = requests.get(url_lp).json()
         print(resp2)
 
-        if resp2['updates']:
+        if resp2.get('updates'):
 
-            for my_list in resp2['updates']:
+            for event_list in resp2['updates']:
 
-                if my_list[0] == 4 and my_list[5].lower() in ['найди пару', 'пару', 'подругу']:
-                    chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} "
+                if event_list[0] == 4 and event_list[5].lower() in ['найди пару', 'пару', 'подругу']:
+                    chat_sender(chat_id=event_list[3], mesaga=f"{get_user_first_name(user=event_list[6]['from'])} "
                                                            f"укажи пол, возраст и город как показано в образце:\n"
                                                            f"Пол: ж\nВозраст: 27\nГород: Томск")
 
-                elif my_list[0] == 4 and my_list[5].startswith('Пол:'):
-                    chat_sender(chat_id=my_list[3], mesaga=f"{get_user_first_name(user=my_list[6]['from'])} ща буит!")
-                    mu_list = my_list[5].split('<br>')
-                    print(mu_list)
+                elif event_list[0] == 4 and event_list[5].startswith('Пол:'):
+                    chat_sender(chat_id=event_list[3], mesaga=f"Будет исполнено {get_user_first_name(user=event_list[6]['from'])}!")
+                    answer = event_list[5].split('<br>')
+                    print(answer)
                     # print(mu_list[0][-1]) # пол
                     # print(mu_list[1][-2:]) # возраст
                     # print(mu_list[2][7:]) # город
                     # print(user_search(mu_list[1][-2:], mu_list[2][7:]))
-                    persons = top_three_v2(data_constructor(user_search(age=mu_list[1][-2:], city=mu_list[2][7:])))
+
+                    if answer[0][-1] == 'ж':
+                        gender = 1
+                    elif answer[0][-1] == 'м':
+                        gender = 2
+                    else:
+                        gender = 1
+
+                    persons = top_three_v2(data_constructor(user_search(age=answer[1][-2:], city=answer[2][7:], sex=gender)))
+
                     print(persons)
+
                     for user_id, person in persons.items():
                         # print(person)
                         message1 = f"Профиль: https://vk.com/id{user_id}"
