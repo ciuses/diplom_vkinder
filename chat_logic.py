@@ -51,20 +51,18 @@ def chat_listener(token: str = token_soc):
                         message1 = f"Профиль: https://vk.com/id{user_id}"
                         chat_sender(mesaga=message1)
                         for pers in person:
-                            chat_sender(mesaga=f"Фото {pers['f_name']} {pers['l_name']}:\n",
+                            chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
                 elif event_list[0] == 4 and event_list[5].lower() in ['ещё', 'дальше', 'следующая', 'следующий']:
 
                     chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
-
                     off += 3
-
                     persons = top_three_v2(data_constructor(user_search(age=answer[1][-2:],
                                                                         city=answer[2][7:],
                                                                         sex=gender,
                                                                         off_num=off)))
-                    print(persons)
+                    # print(persons)
 
                     if len(persons) > 0:
 
