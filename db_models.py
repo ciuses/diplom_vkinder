@@ -1,8 +1,9 @@
 import sqlalchemy as alch
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-
 Base = declarative_base()
+data_source_name = f"postgresql://postgres:hanson@172.16.5.25:5432/my_db"
+engine = alch.create_engine(data_source_name)
 
 
 # class Publisher(Base):
@@ -31,7 +32,6 @@ Base = declarative_base()
 #         return f'id={self.id}\ntitle={self.title}\nid_publisher={self.id_publisher}'
 
 
-
 class Requester(Base):
     __tablename__ = "requester"
 
@@ -52,6 +52,7 @@ class Users(Base):
 
     requester = relationship("Requester", back_populates="users")
 
+
 class Photos(Base):
     __tablename__ = "photos"
 
@@ -61,6 +62,7 @@ class Photos(Base):
     link = alch.Column(alch.Text, unique=True)
 
     users = relationship("Users", back_populates="photos")
+
 
 class Black_List(Base):
     __tablename__ = "black_list"
@@ -74,14 +76,7 @@ def create_tables(engine):
     Base.metadata.create_all(engine)
 
 
-
-
-data_source_name = f"postgresql://postgres:hanson@172.16.5.25:5432/my_db"
-engine = alch.create_engine(data_source_name)
-
 if __name__ == '__main__':
-
     create_tables(engine)
     Session = sessionmaker(bind=engine)
     my_session = Session()
-
