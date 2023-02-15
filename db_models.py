@@ -2,7 +2,7 @@ import sqlalchemy as alch
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 Base = declarative_base()
-data_source_name = f"postgresql://postgres:hanson@172.16.5.25:5432/my_db"
+data_source_name = f"postgresql://postgres:hanson@192.168.56.101:5432/vkinder"
 engine = alch.create_engine(data_source_name)
 
 
@@ -55,7 +55,7 @@ class Users(Base):
 
 class Photos(Base):
     __tablename__ = "photos"
-
+    id = alch.Column(alch.Integer, primary_key=True)
     photo_id = alch.Column(alch.Integer, alch.ForeignKey("users.id"), nullable=False, unique=True)
     likes = alch.Column(alch.Integer, nullable=True)
     comments = alch.Column(alch.Integer, nullable=True)
