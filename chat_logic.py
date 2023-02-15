@@ -28,12 +28,14 @@ def chat_listener(token: str = token_soc):
             for event_list in resp2['updates']:
 
                 if event_list[0] == 4 and event_list[5].lower() in ['найди пару', 'пару', 'подругу']:
-                    chat_sender(chat_id=event_list[3], mesaga=f"{get_user_first_name(user=event_list[6]['from'])} "
-                                                           f"укажи пол, возраст и город как показано в образце:\n"
-                                                           f"Пол: ж\nВозраст: 27\nГород: Томск")
+                    chat_sender(chat_id=event_list[3],
+                                mesaga=f"{get_user_first_name(user=event_list[6]['from'])} укажи пол, возраст и город "
+                                       f"как показано в образце:\nПол: ж\nВозраст: 27\nГород: Томск")
 
                 elif event_list[0] == 4 and event_list[5].startswith('Пол:'):
-                    chat_sender(chat_id=event_list[3], mesaga=f"Будет исполнено {get_user_first_name(user=event_list[6]['from'])}!")
+                    chat_sender(chat_id=event_list[3],
+                                mesaga=f"Будет исполнено {get_user_first_name(user=event_list[6]['from'])}!")
+
                     answer = event_list[5].split('<br>')
                     print(answer)
 
@@ -71,7 +73,7 @@ def chat_listener(token: str = token_soc):
                             chat_sender(mesaga=message1)
 
                             for pers in person:
-                                chat_sender(mesaga=f"Фото {pers['f_name']} {pers['l_name']}:\n",
+                                chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                             attach=f"photo{user_id}_{pers['photo_id']}")
 
                     else:

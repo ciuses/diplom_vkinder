@@ -57,10 +57,11 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_
                       for str_data in resp['response']['items']
                       if str_data['can_access_closed'] == False]
 
-    else:
-        return False
+        return list_of_tupls, black_list
 
-    return list_of_tupls, black_list
+    else:
+        # return False
+        print(resp)
 
 
 
@@ -78,7 +79,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
            'owner_id': user,
            'album_id': album,
            'extended': 1,
-           'photo_sizes': 1}  # Фото профиля
+           'photo_sizes': 1}
     resp = requests.get(url, params=par).json()
     # print(user, resp)
 
@@ -89,7 +90,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     #     print(user, resp)
 
 
-def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом деле там тьюпл
+def data_constructor(w_list_b_list_tupl: list) -> dict:
     '''
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
     :return:
@@ -99,16 +100,13 @@ def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом дел
     138103064: [{'likes': 84, 'comments': 0, 'link': 'https://'}]}
     '''
     like_comment_photo = {}
-    # print(w_list_b_list_tupl)
-    tuple_with_users = w_list_b_list_tupl[0]
-    # print(list_with_users)
-    for user_id, f_name, l_name in tuple_with_users:
-        # print(user_id, f_name, l_name)
-        response_dict = photo_info(user_id)
-        # print(id_user, my_dict)
 
-        if response_dict:
+    if w_list_b_list_tupl:
+
+        for user_id, f_name, l_name in w_list_b_list_tupl[0]:
+            response_dict = photo_info(user_id)
             like_comment_photo[user_id] = []
+
             for item in response_dict['response']['items']:
                 like_comment_photo[user_id].append({'likes': item['likes']['count'],
                                                     'comments': item['comments']['count'],
@@ -117,14 +115,10 @@ def data_constructor(w_list_b_list_tupl: list) -> dict: # на самом дел
                                                     'photo_id': item['id'],
                                                     'link': item['sizes'][-1]['url']})
 
-        # else:
-        #     print(id_user, my_dict)
 
-        time.sleep(0.5)
+            time.sleep(0.5)
 
-
-
-    return like_comment_photo
+        return like_comment_photo
 
 
 # def top_three(any_dict):
@@ -253,6 +247,7 @@ if __name__ == '__main__':
     #     print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
+    # print(data_constructor(user_search('20', 'Томск')))
     for k, v in data_constructor(user_search('20', 'Томск')).items():
         print(k, len(v), v)
 
