@@ -26,7 +26,7 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     return resp['response'][0]['first_name']
 
 
-def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_num: str = None) -> tuple:
+def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_num: int = None) -> tuple:
     '''
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
@@ -87,7 +87,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     #     print(user, resp)
 
 
-def data_constructor(w_list_b_list_tupl: list) -> dict:
+def data_constructor(w_list_b_list_tupl: tuple) -> dict:
     '''
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
     :return:
