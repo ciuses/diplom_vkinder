@@ -9,12 +9,11 @@ base_url = 'https://api.vk.com/method/'
 
 def get_user(user: str = '7385081'):
     '''
-
+    Получает данные юзера по бирер токена.
     '''
     head = {'Authorization': f'Bearer {b_token}'}
     par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate'}
     resp = requests.get(f'{base_url}users.get', params=par, headers=head).json()
-
     return resp
 
 
@@ -32,7 +31,8 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
     '''
-    par = {'access_token': token, 'v': '5.131',
+    par = {'access_token': token,
+           'v': '5.131',
            'count': '3',  # 1000
            'offset': off_num,
            'hometown': city,

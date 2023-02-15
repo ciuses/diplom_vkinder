@@ -14,6 +14,7 @@ def chat_listener(token: str = token_soc):
     ts_number = data_dict['response']['ts']
     gender = None
     off = 0
+    answer = None
 
     while True:
 
@@ -78,8 +79,6 @@ def chat_listener(token: str = token_soc):
 
                     else:
                         chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
-
-
 
         ts_number = resp2['ts']
 
