@@ -1,14 +1,14 @@
 import requests
 from random import randrange
 from token_other import vk_token_soc as token_soc
-from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor
+from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url
 
 
 def chat_listener(token: str = token_soc):
     '''
     Принимает на вход токен, печатает то что пишут в чате
     '''
-    url = 'https://api.vk.com/method/messages.getLongPollServer'
+    url = f'{base_url}messages.getLongPollServer'
     data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
     # print(data_dict)
     ts_number = data_dict['response']['ts']
@@ -88,13 +88,13 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     '''
     Пишет в чат чё то
     '''
-    url = 'https://api.vk.com/method/messages.send'
-    data_dict = requests.post(url, params={'access_token': token,
-                                           'v': '5.131',
-                                           'peer_id': chat_id,
-                                           'message': mesaga,
-                                           'attachment': attach,
-                                           'random_id': randrange(10 ** 7)}).json()
+    par = {'access_token': token,
+           'v': '5.131',
+           'peer_id': chat_id,
+           'message': mesaga,
+           'attachment': attach,
+           'random_id': randrange(10 ** 7)}
+    data_dict = requests.post(f'{base_url}messages.send', params=par).json()
     # print(data_dict)
 
 

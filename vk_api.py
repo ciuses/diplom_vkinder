@@ -5,15 +5,15 @@ from token_other import bearer_token as b_token
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
 
+base_url = 'https://api.vk.com/method/'
 
 def get_user(user: str = '7385081'):
     '''
 
     '''
-    url = 'https://api.vk.com/method/users.get'
     head = {'Authorization': f'Bearer {b_token}'}
     par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate'}
-    resp = requests.get(url, params=par, headers=head).json()
+    resp = requests.get(f'{base_url}users.get', params=par, headers=head).json()
 
     return resp
 
@@ -22,9 +22,8 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
     '''
     Получает id, возвращает Имя.
     '''
-    url = 'https://api.vk.com/method/users.get'
     par = {'access_token': token, 'v': '5.131', 'user_ids': user}
-    resp = requests.get(url, params=par).json()
+    resp = requests.get(f'{base_url}users.get', params=par).json()
     return resp['response'][0]['first_name']
 
 
@@ -33,7 +32,6 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
     '''
-    url = 'https://api.vk.com/method/users.search'
     par = {'access_token': token, 'v': '5.131',
            'count': '3',  # 1000
            'offset': off_num,
@@ -45,7 +43,7 @@ def user_search(age: str, city: str, token: str = vk_token, sex: str = '1', off_
            'relation': '6',  # 0, 1, 5, 6
            'has_photo': '1'}
 
-    resp = requests.get(url, params=par).json()
+    resp = requests.get(f'{base_url}users.search', params=par).json()
     # print(resp)
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
 
@@ -73,14 +71,13 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     :param album: альбом по дифолту, фотки профиля
     :return: джейсона
     '''
-    url = 'https://api.vk.com/method/photos.get'
     par = {'access_token': token,
            'v': '5.131',
            'owner_id': user,
            'album_id': album,
            'extended': 1,
            'photo_sizes': 1}
-    resp = requests.get(url, params=par).json()
+    resp = requests.get(f'{base_url}photos.get', params=par).json()
     # print(user, resp)
 
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
