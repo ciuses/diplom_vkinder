@@ -56,8 +56,8 @@ class Photos(Base):
     __tablename__ = "photos"
 
     photo_id = alch.Column(alch.Integer, alch.ForeignKey("users.id"), nullable=False, unique=True)
-    likes = alch.Column(alch.Integer, nullable=False)
-    comments = alch.Column(alch.Integer, nullable=False)
+    likes = alch.Column(alch.Integer, nullable=True)
+    comments = alch.Column(alch.Integer, nullable=True)
     link = alch.Column(alch.Text, unique=True)
 
     users = relationship("Users", back_populates="photos")
@@ -69,20 +69,19 @@ class Black_List(Base):
     user_id = alch.Column(alch.Integer, nullable=False, unique=True)
 
 
+def create_tables(engine):
+    Base.metadata.drop_all(engine)
+    Base.metadata.create_all(engine)
 
-############################### Строка подключения и создание движка алхимии
 
-# load_dotenv()
-# data_source_name = f"postgresql://{os.getenv('USER')}:" \
-#                    f"{os.getenv('PASSWORD')}@" \
-#                    f"{os.getenv('HOST')}:" \
-#                    f"{os.getenv('PORT')}/" \
-#                    f"{os.getenv('DB')}"
+
+
+data_source_name = f"postgresql://postgres:hanson@172.16.5.25:5432/my_db"
 engine = alch.create_engine(data_source_name)
-# create_tables(engine)
 
-############################################# сессия
+if __name__ == '__main__':
 
-Session = sessionmaker(bind=engine)
-my_session = Session()
+    create_tables(engine)
+    Session = sessionmaker(bind=engine)
+    my_session = Session()
 
