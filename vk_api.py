@@ -4,6 +4,7 @@ from token_other import vk_access_token as vk_token
 from token_other import bearer_token as b_token
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
+from db_models import Black_List, my_session, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
 
@@ -90,11 +91,24 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
 def data_constructor(w_list_b_list_tupl: tuple) -> dict:
     '''
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
-    :return:
-    {606233587: [{'likes': 93, 'comments': 3, 'link': 'https://'}],
-    44151122: [{'likes': 133, 'comments': 3, 'link': 'https://'},
-                {'likes': 153, 'comments': 1, 'link': 'https://'}],
-    138103064: [{'likes': 84, 'comments': 0, 'link': 'https://'}]}
+    :return: {180015464: [{'likes': 18,
+                            'comments': 0,
+                            'f_name': 'Лидия',
+                            'l_name': 'Абрамова',
+                            'photo_id': 286935869,
+                            'link': 'https://'}],
+                506039351: [{'likes': 56,
+                            'comments': 0,
+                            'f_name': 'Лиза',
+                            'l_name': 'Колесникова',
+                            'photo_id': 456239032,
+                            'link': 'https://'}],
+                299467993: [{'likes': 2,
+                            'comments': 0,
+                            'f_name': 'Поля',
+                            'l_name': 'Гора',
+                            'photo_id': 417859251,
+                            'link': 'https://'}]}
     '''
     like_comment_photo = {}
 
@@ -115,6 +129,8 @@ def data_constructor(w_list_b_list_tupl: tuple) -> dict:
 
             time.sleep(0.5)
 
+
+        db_writer(any_list=w_list_b_list_tupl[1], any_dict=like_comment_photo)
         return like_comment_photo
 
 
@@ -197,6 +213,30 @@ def top_three_v2(my_struct_dict: dict):
 #     # print(len(dirty_user_id), dirty_user_id)
 #     return clean_user_id
 
+def db_writer(any_dict = None, any_list = None):
+
+    if any_dict:
+        any_requester = Requester(requester_id=7385081, f_name='А', l_name='Б')
+        my_session.add(any_requester)
+        my_session.commit()
+
+        for u_id, photos in any_dict.items():
+
+            any_user = Users(requ_id=any_requester.id, user_id=u_id, f_name=photos[0]['f_name'], l_name=photos[0]['l_name'], city='Томск')
+            my_session.add(any_user)
+            my_session.commit()
+
+            for photo in photos:
+
+                any_photo = Photos(use_id=any_user.id, photo_id=photo['photo_id'], likes=photo['likes'], comments=photo['comments'], link=photo['link'])
+                my_session.add(any_photo)
+                my_session.commit()
+
+    if any_list:
+        for user_id in any_list:
+            my_session.add(Black_List(user_id=user_id))
+            my_session.commit()
+
 
 if __name__ == '__main__':
 
@@ -244,7 +284,7 @@ if __name__ == '__main__':
     #     print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
-    # print(data_constructor(user_search('20', 'Томск')))
+    print(data_constructor(user_search('20', 'Томск')))
     for k, v in data_constructor(user_search('20', 'Томск')).items():
         print(k, len(v), v)
 
