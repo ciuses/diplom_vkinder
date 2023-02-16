@@ -6,32 +6,6 @@ data_source_name = f"postgresql://postgres:hanson@192.168.56.101:5432/vkinder"
 engine = alch.create_engine(data_source_name)
 
 
-# class Publisher(Base):
-#     __tablename__ = "publisher"
-#
-#     id = alch.Column(alch.Integer, primary_key=True)
-#     name = alch.Column(alch.String(length=80), unique=True)
-#
-#     book = relationship("Book", back_populates="publisher")
-#
-#     def __str__(self):
-#         return f'id={self.id}\nname={self.name}'
-#
-#
-# class Book(Base):
-#     __tablename__ = "book"
-#
-#     id = alch.Column(alch.Integer, primary_key=True)
-#     title = alch.Column(alch.String(length=255), unique=True)
-#     id_publisher = alch.Column(alch.Integer, alch.ForeignKey("publisher.id"), nullable=False)
-#
-#     publisher = relationship("Publisher", back_populates="book")
-#     stock = relationship("Stock", back_populates="book")
-#
-#     def __str__(self):
-#         return f'id={self.id}\ntitle={self.title}\nid_publisher={self.id_publisher}'
-
-
 class Requester(Base):
     __tablename__ = "requester"
 

@@ -4,7 +4,7 @@ from token_other import vk_access_token as vk_token
 from token_other import bearer_token as b_token
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
-from db_models import Black_List, my_session, Users, Photos, Requester
+from db_models import my_session, Black_List, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
 
@@ -213,22 +213,30 @@ def top_three_v2(my_struct_dict: dict):
 #     # print(len(dirty_user_id), dirty_user_id)
 #     return clean_user_id
 
-def db_writer(any_dict = None, any_list = None):
+def db_writer(any_dict = None, any_list = None, my_requester = 7385081):
 
     if any_dict:
-        any_requester = Requester(requester_id=7385081, f_name='А', l_name='Б')
+        any_requester = Requester(requester_id=my_requester, f_name='А', l_name='Б')
         my_session.add(any_requester)
         my_session.commit()
 
         for u_id, photos in any_dict.items():
 
-            any_user = Users(requ_id=any_requester.id, user_id=u_id, f_name=photos[0]['f_name'], l_name=photos[0]['l_name'], city='Томск')
+            any_user = Users(requ_id=any_requester.id,
+                             user_id=u_id,
+                             f_name=photos[0]['f_name'],
+                             l_name=photos[0]['l_name'],
+                             city='Томск')
             my_session.add(any_user)
             my_session.commit()
 
             for photo in photos:
 
-                any_photo = Photos(use_id=any_user.id, photo_id=photo['photo_id'], likes=photo['likes'], comments=photo['comments'], link=photo['link'])
+                any_photo = Photos(use_id=any_user.id,
+                                   photo_id=photo['photo_id'],
+                                   likes=photo['likes'],
+                                   comments=photo['comments'],
+                                   link=photo['link'])
                 my_session.add(any_photo)
                 my_session.commit()
 
