@@ -41,6 +41,7 @@ def chat_listener(token: str = token_soc):
                                        f"как показано в образце:\nПол: ж\nВозраст: 27\nГород: Томск")
 
                 elif event_list[0] == 4 and event_list[5].startswith('Пол:'):
+                    searcher_id = event_list[6]['from']
                     chat_sender(chat_id=event_list[3],
                                 mesaga=f"Будет исполнено {get_user_first_name(user=searcher_id)[0]}!")
 
@@ -71,26 +72,24 @@ def chat_listener(token: str = token_soc):
                             chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
-                elif event_list[0] == 4 and event_list[5].lower() in ['ещё', 'дальше', 'следующая', 'следующий']:
+                elif event_list[0] == 4 and event_list[5].lower() in ['ещё', 'еще', 'дальше', 'следующая', 'следующий']:
 
                     chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
                     off += 3
-
                     search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off)
-                    all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
-                    persons = top_three_v2(all_data_dict)
 
-                    # print(persons)
+                    if search_results:
+                        all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
+                        persons = top_three_v2(all_data_dict)
 
-                    if len(persons) > 0:
+                        if len(persons) > 0:
+                            for user_id, person in persons.items():
+                                message1 = f"Профиль: https://vk.com/id{user_id}"
+                                chat_sender(mesaga=message1)
 
-                        for user_id, person in persons.items():
-                            message1 = f"Профиль: https://vk.com/id{user_id}"
-                            chat_sender(mesaga=message1)
-
-                            for pers in person:
-                                chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
-                                            attach=f"photo{user_id}_{pers['photo_id']}")
+                                for pers in person:
+                                    chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                                attach=f"photo{user_id}_{pers['photo_id']}")
 
                     else:
                         chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")

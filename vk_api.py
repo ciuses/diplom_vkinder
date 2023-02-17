@@ -24,7 +24,6 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user}
     resp = requests.get(f'{base_url}users.get', params=par).json()
-    print(resp['response'][0]['first_name'], resp['response'][0]['last_name'])
     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
@@ -60,8 +59,8 @@ def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_nu
         return list_of_tupls, black_list
 
     else:
-        # return False
-        print(resp)
+        return False
+    #     print(resp)
 
 
 
@@ -112,7 +111,6 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
                             'link': 'https://'}]}
     '''
     like_comment_photo = {}
-
     if w_list_b_list_tupl:
 
         for user_id, f_name, l_name in w_list_b_list_tupl[0]:
