@@ -12,9 +12,15 @@ def chat_listener(token: str = token_soc):
     data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
     # print(data_dict)
     ts_number = data_dict['response']['ts']
-    gender = None
-    off = 0
     answer = None
+    gender = None
+    row_city = None
+    row_age = None
+    off = 0
+    searcher_id = None
+    first = None
+    last = None
+
 
     while True:
 
@@ -29,13 +35,14 @@ def chat_listener(token: str = token_soc):
             for event_list in resp2['updates']:
 
                 if event_list[0] == 4 and event_list[5].lower() in ['найди пару', 'пару', 'подругу']:
+                    searcher_id = event_list[6]['from']
                     chat_sender(chat_id=event_list[3],
-                                mesaga=f"{get_user_first_name(user=event_list[6]['from'])} укажи пол, возраст и город "
+                                mesaga=f"{get_user_first_name(user=searcher_id)[0]} укажи пол, возраст и город "
                                        f"как показано в образце:\nПол: ж\nВозраст: 27\nГород: Томск")
 
                 elif event_list[0] == 4 and event_list[5].startswith('Пол:'):
                     chat_sender(chat_id=event_list[3],
-                                mesaga=f"Будет исполнено {get_user_first_name(user=event_list[6]['from'])}!")
+                                mesaga=f"Будет исполнено {get_user_first_name(user=searcher_id)[0]}!")
 
                     answer = event_list[5].split('<br>')
                     print(answer)
@@ -47,7 +54,14 @@ def chat_listener(token: str = token_soc):
                     else:
                         gender = 1
 
-                    persons = top_three_v2(data_constructor(user_search(age=answer[1][-2:], city=answer[2][7:], sex=gender)))
+                    row_city = answer[2][7:]
+                    row_age = answer[1][-2:]
+                    first, last = get_user_first_name(user=searcher_id)
+
+                    search_results = user_search(age=row_age, city=row_city, sex=gender)
+                    all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
+                    persons = top_three_v2(all_data_dict)
+
                     # print(persons)
                     for user_id, person in persons.items():
                         # print(person)
@@ -61,10 +75,11 @@ def chat_listener(token: str = token_soc):
 
                     chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
                     off += 3
-                    persons = top_three_v2(data_constructor(user_search(age=answer[1][-2:],
-                                                                        city=answer[2][7:],
-                                                                        sex=gender,
-                                                                        off_num=off)))
+
+                    search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off)
+                    all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
+                    persons = top_three_v2(all_data_dict)
+
                     # print(persons)
 
                     if len(persons) > 0:

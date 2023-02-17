@@ -1,8 +1,8 @@
 import sqlalchemy as alch
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
-Base = declarative_base()
 data_source_name = f"postgresql://postgres:hanson@192.168.56.101:5432/vkinder"
+Base = declarative_base()
 engine = alch.create_engine(data_source_name)
 
 

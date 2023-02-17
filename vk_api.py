@@ -18,13 +18,14 @@ def get_user(user: str = '7385081'):
     return resp
 
 
-def get_user_first_name(token: str = token_soc, user: str = '7385081') -> str:
+def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
     Получает id, возвращает Имя.
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user}
     resp = requests.get(f'{base_url}users.get', params=par).json()
-    return resp['response'][0]['first_name']
+    print(resp['response'][0]['first_name'], resp['response'][0]['last_name'])
+    return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
 def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_num: int = None) -> tuple:
@@ -88,7 +89,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     #     print(user, resp)
 
 
-def data_constructor(w_list_b_list_tupl: tuple) -> dict:
+def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
     '''
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
     :return: {180015464: [{'likes': 18,
@@ -130,7 +131,7 @@ def data_constructor(w_list_b_list_tupl: tuple) -> dict:
             time.sleep(0.5)
 
 
-        db_writer(any_list=w_list_b_list_tupl[1], any_dict=like_comment_photo)
+        db_writer(black_list=w_list_b_list_tupl[1], main_dict=like_comment_photo, add_searcher_data=additional_data)
         return like_comment_photo
 
 
@@ -213,20 +214,33 @@ def top_three_v2(my_struct_dict: dict):
 #     # print(len(dirty_user_id), dirty_user_id)
 #     return clean_user_id
 
-def db_writer(any_dict = None, any_list = None, my_requester = 7385081):
+def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
 
-    if any_dict:
-        any_requester = Requester(requester_id=my_requester, f_name='А', l_name='Б')
+    searcher_id = None
+    criterion_city = None
+    first = None
+    last = None
+
+    if add_searcher_data:
+        searcher_id = add_searcher_data[0]
+        criterion_city = add_searcher_data[1]
+        first = add_searcher_data[2]
+        last = add_searcher_data[3]
+
+
+
+    if main_dict:
+        any_requester = Requester(requester_id=searcher_id, f_name=first, l_name=last)
         my_session.add(any_requester)
         my_session.commit()
 
-        for u_id, photos in any_dict.items():
+        for u_id, photos in main_dict.items():
 
             any_user = Users(requ_id=any_requester.id,
                              user_id=u_id,
                              f_name=photos[0]['f_name'],
                              l_name=photos[0]['l_name'],
-                             city='Томск')
+                             city=criterion_city)
             my_session.add(any_user)
             my_session.commit()
 
@@ -240,8 +254,8 @@ def db_writer(any_dict = None, any_list = None, my_requester = 7385081):
                 my_session.add(any_photo)
                 my_session.commit()
 
-    if any_list:
-        for user_id in any_list:
+    if black_list:
+        for user_id in black_list:
             my_session.add(Black_List(user_id=user_id))
             my_session.commit()
 
