@@ -1,7 +1,6 @@
 import requests
-from random import randrange
 from token_other import vk_token_soc as token_soc
-from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url
+from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender
 
 
 def chat_listener(token: str = token_soc):
@@ -97,18 +96,6 @@ def chat_listener(token: str = token_soc):
         ts_number = resp2['ts']
 
 
-def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str = 'hello', attach: str = None):
-    '''
-    Пишет в чат чё то
-    '''
-    par = {'access_token': token,
-           'v': '5.131',
-           'peer_id': chat_id,
-           'message': mesaga,
-           'attachment': attach,
-           'random_id': randrange(10 ** 7)}
-    data_dict = requests.post(f'{base_url}messages.send', params=par).json()
-    # print(data_dict)
 
 
 if __name__ == '__main__':

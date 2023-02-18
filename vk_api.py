@@ -1,5 +1,6 @@
 import time
 import requests
+from random import randrange
 from token_other import vk_access_token as vk_token
 from token_other import bearer_token as b_token
 from token_other import vk_token_soc as token_soc
@@ -27,7 +28,7 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
-def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_num: int = None) -> tuple:
+def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_num: int = None):
     '''
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
@@ -60,7 +61,6 @@ def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_nu
 
     else:
         return False
-    #     print(resp)
 
 
 
@@ -133,39 +133,6 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
         return like_comment_photo
 
 
-# def top_three(any_dict):
-#     topchik_likes = {}  # нужны для определения самой залайканой фотки
-#     topchik_comments = {}  # нужны для определения самой закоменчиной фотки
-#
-#     for user, lk_com_li in any_dict.items():
-#         # print(user, lk_com_li)
-#         topchik_likes[user] = []
-#         topchik_comments[user] = []
-#
-#         for like_dict in lk_com_li:
-#             # l.append(like_dict['likes'])
-#             topchik_likes[user].append(like_dict['likes'])
-#             topchik_comments[user].append(like_dict['comments'])
-#
-#         # print(user, max(l), l)
-#     # print(topchik_likes)
-#     # print(topchik_likes.values())
-#     # print(max(topchik_likes.get(138103064)))
-#
-#     for user, lk_com_li in any_dict.items():
-#         for like_dict in lk_com_li:
-#             if like_dict['likes'] == max(topchik_likes.get(user)):
-#                 # print(f'У юзера {user} сумма лайков -> {sum(topchik_likes.get(user))}')
-#                 print(user, like_dict)
-#
-#     # for user, lk_com_li in any_dict.items():
-#     #     for like_dict in lk_com_li:
-#     #         if like_dict['comments'] == max(topchik_comments.get(user)):
-#
-#     # print(like_dict)
-#     # print(topchik_likes)
-#     # print(topchik_comments)
-
 
 def top_three_v2(my_struct_dict: dict):
     '''
@@ -186,32 +153,6 @@ def top_three_v2(my_struct_dict: dict):
     return top_dict
 
 
-# def sieve(list_of_user_id: list, token: str = vk_token) -> list:
-#     '''
-#     Чистит список юрез айди от приватных.
-#     :param list_of_user_id: список юзеров
-#     :return: чистый список
-#     '''
-#     clean_user_id = []
-#     dirty_user_id = []
-#
-#     for user_id in list_of_user_id:
-#         url = 'https://api.vk.com/method/users.get'
-#         par = {'access_token': token, 'v': '5.131', 'user_ids': user_id}
-#         resp = requests.get(url, params=par).json()
-#         # print(resp)
-#         # print(user_id, resp.get('response')[0].get('can_access_closed'))
-#
-#         if resp.get('response')[0].get('can_access_closed'):
-#             clean_user_id.append(user_id)
-#         else:
-#             dirty_user_id.append(user_id)
-#         time.sleep(0.5)
-#
-#     # print(len(clean_user_id), clean_user_id)
-#     # print(len(dirty_user_id), dirty_user_id)
-#     return clean_user_id
-
 def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
 
     searcher_id = None
@@ -224,7 +165,6 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
         criterion_city = add_searcher_data[1]
         first = add_searcher_data[2]
         last = add_searcher_data[3]
-
 
 
     if main_dict:
@@ -256,6 +196,19 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
         for user_id in black_list:
             my_session.add(Black_List(user_id=user_id))
             my_session.commit()
+
+
+def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str = 'hello', attach: str = None):
+    '''
+    Пишет в чат чё то
+    '''
+    par = {'access_token': token,
+           'v': '5.131',
+           'peer_id': chat_id,
+           'message': mesaga,
+           'attachment': attach,
+           'random_id': randrange(10 ** 7)}
+    requests.post(f'{base_url}messages.send', params=par).json()
 
 
 if __name__ == '__main__':
