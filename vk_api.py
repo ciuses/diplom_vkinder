@@ -14,7 +14,7 @@ def get_user(user: str = '7385081'):
     Получает данные юзера по бирер токена.
     '''
     head = {'Authorization': f'Bearer {b_token}'}
-    par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate'}
+    par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
     resp = requests.get(f'{base_url}users.get', params=par, headers=head).json()
     return resp
 
@@ -28,7 +28,7 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
-def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_num: int = None):
+def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1, off_num: int = None, city_id: int = None):
     '''
     Ищет пользователей контача по критериям
     'bdate, career, contacts, interests, photo_100, universities'
@@ -42,6 +42,7 @@ def user_search(age: str, city: str, token: str = vk_token, sex: int = 1, off_nu
            'status': '1',
            'age_from': age,
            'age_to': age,
+           'city_id': city_id,
            'relation': '6',  # 0, 1, 5, 6
            'has_photo': '1'}
 
@@ -217,6 +218,7 @@ if __name__ == '__main__':
     # chat_listener()
     # chat_sender(mesaga='Дороу')
     '''Данные юзера'''
+    # print(get_user())
     # print(get_user(user='93600308'))
     # print(get_user(user='111189286'))
     # print(get_user(user='763845157'))
@@ -257,9 +259,9 @@ if __name__ == '__main__':
     #     print(tu)
     # top_three_v2(data_constructor(user_search('27', 'Кемерово')))
 
-    print(data_constructor(user_search('20', 'Томск')))
-    for k, v in data_constructor(user_search('20', 'Томск')).items():
-        print(k, len(v), v)
+    # print(data_constructor(user_search('20', 'Томск')))
+    # for k, v in data_constructor(user_search('20', 'Томск')).items():
+    #     print(k, len(v), v)
 
     '''Сортировка'''
     # top_three_v2(data_constructor(user_search('20', 'Томск')))

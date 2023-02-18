@@ -1,6 +1,8 @@
+from datetime import date
+
 import requests
 from token_other import vk_token_soc as token_soc
-from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender
+from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user
 
 
 def chat_listener(token: str = token_soc):
@@ -94,6 +96,34 @@ def chat_listener(token: str = token_soc):
 
                     else:
                         chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
+
+                elif event_list[0] == 4 and event_list[5].lower() in ['мне', 'для меня']:
+                    searcher_id = event_list[6]['from']
+                    all_user_data = get_user(searcher_id)
+                    print(all_user_data)
+                    # print(all_user_data['response'][0]['bdate'])
+                    # print(all_user_data['response'][0]['city']['title'])
+                    print(all_user_data['response'][0]['sex'])
+                    # print('Возраст', date.today().year - int(all_user_data['response'][0]['bdate'][-4:]))
+
+                    my_age = date.today().year - int(all_user_data['response'][0]['bdate'][-4:])
+                    my_city = all_user_data['response'][0]['city']['title']
+                    my_city_id = all_user_data['response'][0]['city']['id']
+                    my_gender = all_user_data['response'][0]['sex']
+
+                    if my_gender == '1':
+                        my_gender = 2
+                    else:
+                        my_gender = 1
+
+                    print(my_gender, my_age, my_city)
+
+                    search_results = user_search(age=str(my_age), city_id=my_city_id, sex=str(my_gender))
+                    print(search_results)
+                    # for it in search_results:
+                    #     print(it)
+
+
 
         ts_number = response['ts']
 
