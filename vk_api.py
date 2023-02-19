@@ -65,7 +65,6 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
         return False
 
 
-
 def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     '''
     Функция запоса аватарки
@@ -133,7 +132,6 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
 
         db_writer(black_list=w_list_b_list_tupl[1], main_dict=like_comment_photo, add_searcher_data=additional_data)
         return like_comment_photo
-
 
 
 def top_three_v2(my_struct_dict: dict):
