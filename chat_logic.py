@@ -16,6 +16,7 @@ def chat_listener(token: str = token_soc):
     answer = None
     gender = None
     row_city = None
+    row_city_id = None
     row_age = None
     off = 0
     searcher_id = None
@@ -101,27 +102,51 @@ def chat_listener(token: str = token_soc):
                     searcher_id = event_list[6]['from']
                     all_user_data = get_user(searcher_id)
                     print(all_user_data)
-                    # print(all_user_data['response'][0]['bdate'])
-                    # print(all_user_data['response'][0]['city']['title'])
-                    print(all_user_data['response'][0]['sex'])
-                    # print('Возраст', date.today().year - int(all_user_data['response'][0]['bdate'][-4:]))
-
-                    my_age = date.today().year - int(all_user_data['response'][0]['bdate'][-4:])
-                    my_city = all_user_data['response'][0]['city']['title']
-                    my_city_id = all_user_data['response'][0]['city']['id']
-                    my_gender = all_user_data['response'][0]['sex']
-
-                    if my_gender == '1':
-                        my_gender = 2
+                    row_age = date.today().year - int(all_user_data['response'][0]['bdate'][-4:])
+                    row_city_id = all_user_data['response'][0]['city']['id']
+                    first = all_user_data['response'][0]['first_name']
+                    last = all_user_data['response'][0]['last_name']
+                    gender = all_user_data['response'][0]['sex']
+                    if gender == '1':
+                        gender = 2
                     else:
-                        my_gender = 1
+                        gender = 1
 
-                    print(my_gender, my_age, my_city)
+                    search_results = user_search(age=str(row_age), city_id=row_city_id, sex=gender)
+                    all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city_id, first, last))
+                    persons = top_three_v2(all_data_dict)
 
-                    search_results = user_search(age=str(my_age), city_id=my_city_id, sex=str(my_gender))
-                    print(search_results)
-                    # for it in search_results:
-                    #     print(it)
+                    if len(persons) > 0:
+                        for user_id, person in persons.items():
+                            # print(person)
+                            message1 = f"Профиль: https://vk.com/id{user_id}"
+                            chat_sender(chat_id=event_list[3], mesaga=message1)
+                            for pers in person:
+                                chat_sender(chat_id=event_list[3],
+                                            mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                            attach=f"photo{user_id}_{pers['photo_id']}")
+
+                elif event_list[0] == 4 and event_list[5].lower() in ['next', 'больше', 'давай']:
+
+                    chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
+                    off += 3
+                    search_results = user_search(age=row_age, city_id=row_city_id, sex=gender, off_num=off)
+
+                    if search_results:
+                        all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city_id, first, last))
+                        persons = top_three_v2(all_data_dict)
+
+                        if len(persons) > 0:
+                            for user_id, person in persons.items():
+                                message1 = f"Профиль: https://vk.com/id{user_id}"
+                                chat_sender(chat_id=event_list[3], mesaga=message1)
+                                for pers in person:
+                                    chat_sender(chat_id=event_list[3],
+                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                                attach=f"photo{user_id}_{pers['photo_id']}")
+
+                    else:
+                        chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
 
 
 

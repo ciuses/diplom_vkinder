@@ -23,8 +23,9 @@ def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
     Получает id, возвращает Имя.
     '''
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user}
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
     resp = requests.get(f'{base_url}users.get', params=par).json()
+    # print(resp)
     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
@@ -47,7 +48,7 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
            'has_photo': '1'}
 
     resp = requests.get(f'{base_url}users.search', params=par).json()
-    # print(resp)
+    print(resp)
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
 
         list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
@@ -163,9 +164,14 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
 
     if add_searcher_data:
         searcher_id = add_searcher_data[0]
-        criterion_city = add_searcher_data[1]
         first = add_searcher_data[2]
         last = add_searcher_data[3]
+
+        if isinstance(add_searcher_data[1], int):
+            criterion_city = get_city_name(add_searcher_data[1])
+        else:
+            criterion_city = add_searcher_data[1]
+
 
 
     if main_dict:
@@ -212,6 +218,15 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     requests.post(f'{base_url}messages.send', params=par).json()
 
 
+def get_city_name(city_id: int = None):
+    '''
+    Вернёт название города по id. Нужно для записи в базу.
+    '''
+    head = {'Authorization': f'Bearer {b_token}'}
+    par = {'v': '5.131', 'city_ids': city_id}
+    resp = requests.get('https://api.vk.com/method/database.getCitiesById', params=par, headers=head).json()
+    return resp['response'][0]['title']
+
 if __name__ == '__main__':
 
     '''Чат'''
@@ -219,11 +234,11 @@ if __name__ == '__main__':
     # chat_sender(mesaga='Дороу')
     '''Данные юзера'''
     # print(get_user())
-    # print(get_user(user='93600308'))
+    print(get_user(user='93600308'))
     # print(get_user(user='111189286'))
     # print(get_user(user='763845157'))
     # print(photo_info('93600308'))
-    # print(get_user_first_name('93600308'))
+    # print(get_user_first_name())
     # print(sieve(['346034388', '107342491', '65515441', '134989778', '136412187', '473433452']))
     '''Поиск юзеров по критериям'''
     # my_d = user_search('20', 'Томск')
