@@ -48,7 +48,7 @@ class Black_List(Base):
     __tablename__ = "black_list"
 
     id = alch.Column(alch.Integer, primary_key=True)
-    user_id = alch.Column(alch.BIGINT, nullable=False, unique=True)
+    user_id = alch.Column(alch.BIGINT, nullable=False)
 
 
 def create_tables(engine):

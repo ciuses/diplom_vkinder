@@ -1,8 +1,7 @@
 from datetime import date
-
 import requests
 from token_other import vk_token_soc as token_soc
-from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user
+from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
 
 
 def chat_listener(token: str = token_soc):
@@ -14,10 +13,10 @@ def chat_listener(token: str = token_soc):
     # print(data_dict)
     ts_number = data_dict['response']['ts']
     searcher_id = None
+    user_token = None
     answer = None
     gender = None
     row_city = None
-    row_city_id = None
     row_age = None
     off = 0
     first = None
@@ -35,18 +34,30 @@ def chat_listener(token: str = token_soc):
 
         for event_list in response['updates']:
 
-            if event_list[0] == 4 and event_list[5].lower() in ['найди пару', 'пару', 'подругу']:
+            if event_list[0] == 4 and event_list[5].lower() in ['найди пару', 'пару']:
                 searcher_id = event_list[6]['from']
-                chat_sender(chat_id=event_list[3],
-                            mesaga=f"{get_user_first_name(user=searcher_id)[0]} укажи пол, возраст и город как указано "
-                                   f"в образце:\n\n\nПол: ж\nВозраст: 27\nГород: Томск\n\n\n"
-                                   f"Или напиши МНЕ или ДЛЯ МЕНЯ для поиска пары по твоим данным.")
+                chat_sender(chat_id=event_list[3], mesaga=f"{get_user_first_name(user=searcher_id)[0]} "
+                                                          f"предоставь мне свой токен для поиска в таком виде\n"
+                                                          f"Мой токен: vk1.a.5xxx...x\n")
 
-            elif event_list[0] == 4 and event_list[5].startswith('Пол:'):
+            elif event_list[0] == 4 and event_list[5].startswith('Мой токен: vk1.a.5'):
                 searcher_id = event_list[6]['from']
-                chat_sender(chat_id=event_list[3],
-                            mesaga=f"Будет исполнено {get_user_first_name(user=searcher_id)[0]}!")
+                row_user_token = event_list[5]
+                u_token = row_user_token.split()[2]
 
+                if len(u_token) == 220:
+                    user_token = u_token
+                    chat_sender(chat_id=event_list[3], mesaga=f"{get_user_first_name(user=searcher_id)[0]} токен принят. "
+                                                              f"Укажи пол, возраст и город как указанов образце:\n\n\n"
+                                                              f"Пол: ж\nВозраст: 27\nГород: Томск\n\n\n"
+                                                              f"Или напиши МНЕ или ДЛЯ МЕНЯ для поиска пары по твоим данным.")
+                else:
+                    chat_sender(chat_id=event_list[3], mesaga=f"{get_user_first_name(user=searcher_id)[0]} неверный токен")
+
+            elif event_list[0] == 4 and user_token and event_list[5].startswith('Пол:'):
+                searcher_id = event_list[6]['from']
+                first, last = get_user_first_name(user=searcher_id)
+                chat_sender(chat_id=event_list[3], mesaga=f"Будет исполнено {first}!")
                 answer = event_list[5].split('<br>')
                 print(answer)
 
@@ -59,12 +70,10 @@ def chat_listener(token: str = token_soc):
 
                 row_city = answer[2][7:]
                 row_age = answer[1][-2:]
-                first, last = get_user_first_name(user=searcher_id)
 
-                search_results = user_search(age=row_age, city=row_city, sex=gender)
+                search_results = user_search(age=row_age, city=row_city, sex=gender, token=user_token)
                 all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
                 persons = top_three_v2(all_data_dict)
-
                 # print(persons)
                 if len(persons) > 0:
                     for user_id, person in persons.items():
@@ -76,12 +85,12 @@ def chat_listener(token: str = token_soc):
                                         mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
-            elif event_list[0] == 4 and event_list[5].lower() in ['мне', 'для меня']:
+            elif event_list[0] == 4 and user_token and event_list[5].lower() in ['мне', 'для меня']:
                 searcher_id = event_list[6]['from']
-                all_user_data = get_user(searcher_id)
+                all_user_data = get_user_v2(user=searcher_id, token=user_token)
                 print(all_user_data)
                 row_age = date.today().year - int(all_user_data['response'][0]['bdate'][-4:])
-                row_city_id = all_user_data['response'][0]['city']['id']
+                row_city = all_user_data['response'][0]['city']['title']
                 first = all_user_data['response'][0]['first_name']
                 last = all_user_data['response'][0]['last_name']
                 gender = all_user_data['response'][0]['sex']
@@ -91,8 +100,8 @@ def chat_listener(token: str = token_soc):
                 else:
                     gender = 1
 
-                search_results = user_search(age=str(row_age), city_id=row_city_id, sex=gender)
-                all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city_id, first, last))
+                search_results = user_search(age=str(row_age), city=row_city, sex=gender)
+                all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
                 persons = top_three_v2(all_data_dict)
 
                 if len(persons) > 0:
@@ -105,50 +114,30 @@ def chat_listener(token: str = token_soc):
                                         mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
-            elif event_list[0] == 4 and event_list[5].lower() in ['ещё', 'еще', 'дальше', 'следующая', 'следующий']:
+            elif event_list[0] == 4 and row_city and event_list[5].lower() in ['ещё', 'еще', 'дальше']:
 
                 chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
                 off += 3
 
-                if row_city:
+                search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off)
 
-                    search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off)
+                if search_results:
+                    all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
+                    persons = top_three_v2(all_data_dict)
 
-                    if search_results:
-                        all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
-                        persons = top_three_v2(all_data_dict)
+                    if len(persons) > 0:
+                        for user_id, person in persons.items():
+                            message1 = f"Профиль: https://vk.com/id{user_id}"
+                            chat_sender(chat_id=event_list[3], mesaga=message1)
+                            for pers in person:
+                                chat_sender(chat_id=event_list[3],
+                                            mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                            attach=f"photo{user_id}_{pers['photo_id']}")
 
-                        if len(persons) > 0:
-                            for user_id, person in persons.items():
-                                message1 = f"Профиль: https://vk.com/id{user_id}"
-                                chat_sender(chat_id=event_list[3], mesaga=message1)
-                                for pers in person:
-                                    chat_sender(chat_id=event_list[3],
-                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
-                                                attach=f"photo{user_id}_{pers['photo_id']}")
-
-                elif row_city_id:
-
-                    search_results = user_search(age=row_age, city_id=row_city_id, sex=gender, off_num=off)
-
-                    if search_results:
-                        all_data_dict = data_constructor(search_results,
-                                                         additional_data=(searcher_id, row_city_id, first, last))
-                        persons = top_three_v2(all_data_dict)
-
-                        if len(persons) > 0:
-                            for user_id, person in persons.items():
-                                message1 = f"Профиль: https://vk.com/id{user_id}"
-                                chat_sender(chat_id=event_list[3], mesaga=message1)
-                                for pers in person:
-                                    chat_sender(chat_id=event_list[3],
-                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
-                                                attach=f"photo{user_id}_{pers['photo_id']}")
 
 
                 else:
                     chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
-
 
         ts_number = response['ts']
 

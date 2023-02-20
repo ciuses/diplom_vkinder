@@ -2,22 +2,19 @@ import time
 import requests
 from random import randrange
 from token_other import vk_access_token as vk_token
-from token_other import bearer_token as b_token
 from token_other import vk_token_soc as token_soc
 from operator import itemgetter
 from db_models import my_session, Black_List, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
 
-def get_user(user: str = '7385081'):
+def get_user_v2(user: str = '7385081', token: str = vk_token):
     '''
     Получает данные юзера по бирер токена.
     '''
-    head = {'Authorization': f'Bearer {b_token}'}
-    par = {'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
-    resp = requests.get(f'{base_url}users.get', params=par, headers=head).json()
+    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
+    resp = requests.get(f'{base_url}users.get', params=par).json()
     return resp
-
 
 def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
@@ -134,7 +131,7 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
         return like_comment_photo
 
 
-def top_three_v2(my_struct_dict: dict):
+def top_three_v2(my_struct_dict: dict) -> dict:
     '''
     :param my_struct_dict: словарь данных как в data_constructor()
     :return: список тьюплов вида (346034388, {'likes': 4, 'comments': 0, 'link': 'https://}),
@@ -164,11 +161,7 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
         searcher_id = add_searcher_data[0]
         first = add_searcher_data[2]
         last = add_searcher_data[3]
-
-        if isinstance(add_searcher_data[1], int):
-            criterion_city = get_city_name(add_searcher_data[1])
-        else:
-            criterion_city = add_searcher_data[1]
+        criterion_city = add_searcher_data[1]
 
 
 
@@ -216,14 +209,6 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     requests.post(f'{base_url}messages.send', params=par).json()
 
 
-def get_city_name(city_id: int = None):
-    '''
-    Вернёт название города по id. Нужно для записи в базу.
-    '''
-    head = {'Authorization': f'Bearer {b_token}'}
-    par = {'v': '5.131', 'city_ids': city_id}
-    resp = requests.get('https://api.vk.com/method/database.getCitiesById', params=par, headers=head).json()
-    return resp['response'][0]['title']
 
 if __name__ == '__main__':
 
@@ -232,7 +217,7 @@ if __name__ == '__main__':
     # chat_sender(mesaga='Дороу')
     '''Данные юзера'''
     # print(get_user())
-    print(get_user(user='93600308'))
+    print(get_user_v2(user='93600308'))
     # print(get_user(user='111189286'))
     # print(get_user(user='763845157'))
     # print(photo_info('93600308'))
