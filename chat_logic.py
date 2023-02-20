@@ -3,14 +3,12 @@ import requests
 from token_other import vk_token_soc as token_soc
 from vk_api import get_user_first_name, user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
 
-
 def chat_listener(token: str = token_soc):
     '''
     Основная функция чат-бота.
     '''
     url = f'{base_url}messages.getLongPollServer'
     data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
-    # print(data_dict)
     ts_number = data_dict['response']['ts']
     searcher_id = None
     user_token = None
@@ -74,10 +72,9 @@ def chat_listener(token: str = token_soc):
                 search_results = user_search(age=row_age, city=row_city, sex=gender, token=user_token)
                 all_data_dict = data_constructor(search_results, additional_data=(searcher_id, row_city, first, last))
                 persons = top_three_v2(all_data_dict)
-                # print(persons)
+
                 if len(persons) > 0:
                     for user_id, person in persons.items():
-                        # print(person)
                         message1 = f"Профиль: https://vk.com/id{user_id}"
                         chat_sender(chat_id=event_list[3], mesaga=message1)
                         for pers in person:
@@ -106,7 +103,6 @@ def chat_listener(token: str = token_soc):
 
                 if len(persons) > 0:
                     for user_id, person in persons.items():
-                        # print(person)
                         message1 = f"Профиль: https://vk.com/id{user_id}"
                         chat_sender(chat_id=event_list[3], mesaga=message1)
                         for pers in person:
@@ -140,8 +136,6 @@ def chat_listener(token: str = token_soc):
                     chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
 
         ts_number = response['ts']
-
-
 
 
 if __name__ == '__main__':

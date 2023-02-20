@@ -8,9 +8,12 @@ from db_models import my_session, Black_List, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
 
-def get_user_v2(user: str = '7385081', token: str = vk_token):
+def get_user_v2(user: str = '7385081', token: str = vk_token) -> dict:
     '''
-    Получает данные юзера по бирер токена.
+    Получает данные юзера по токену.
+    :param user: user_id из ВК
+    :param token: токен юзера
+    :return: данные пользователя
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
     resp = requests.get(f'{base_url}users.get', params=par).json()
@@ -20,17 +23,25 @@ def get_user_v2(user: str = '7385081', token: str = vk_token):
 def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
     Получает id, возвращает Имя.
+    :param token: токен бота
+    :param user: user_id из ВК
+    :return: Имя и Фамилию
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
     resp = requests.get(f'{base_url}users.get', params=par).json()
-    # print(resp)
     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
 def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1, off_num: int = None, city_id: int = None):
     '''
     Ищет пользователей контача по критериям
-    'bdate, career, contacts, interests, photo_100, universities'
+    :param age: Возраст
+    :param city: Город
+    :param token: токен юзера
+    :param sex: пол
+    :param off_num: оффсет
+    :param city_id: город айди
+    :return: либо 2 списка в тьюпле либо фолз
     '''
     par = {'access_token': token,
            'v': '5.131',
@@ -46,7 +57,7 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
            'has_photo': '1'}
 
     resp = requests.get(f'{base_url}users.search', params=par).json()
-    print(resp)
+
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
 
         list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
@@ -69,7 +80,7 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
     :param user: юзер айди
     :param token: токен
     :param album: альбом по дифолту, фотки профиля
-    :return: джейсона
+    :return: словарь данных с лайками, коментами и прочим
     '''
     par = {'access_token': token,
            'v': '5.131',
@@ -78,17 +89,14 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
            'extended': 1,
            'photo_sizes': 1}
     resp = requests.get(f'{base_url}photos.get', params=par).json()
-    # print(user, resp)
 
     if resp.get('response') and len(resp.get('response').get('items')) > 0:
         return resp
 
-    # else:
-    #     print(user, resp)
-
 
 def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
     '''
+    Основная функция построения даннх по пользователю.
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
     :return: {180015464: [{'likes': 18,
                             'comments': 0,
@@ -134,15 +142,15 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
 
 def top_three_v2(my_struct_dict: dict) -> dict:
     '''
+    Функция сортировки фоток по критериям.
     :param my_struct_dict: словарь данных как в data_constructor()
     :return: список тьюплов вида (346034388, {'likes': 4, 'comments': 0, 'link': 'https://}),
                                 (107342491, {'likes': 982, 'comments': 3, 'link': 'https://})
     '''
     top_dict = {}
     for user_id, lk_com_li in my_struct_dict.items():
-        # print(user_id, lk_com_li)
         sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'), reverse=True)
-        # print(len(sorted_list_of_dicts), sorted_list_of_dicts)
+
         if len(sorted_list_of_dicts) > 3:
             top_dict[user_id] = sorted_list_of_dicts[:3]
         else:
@@ -152,6 +160,12 @@ def top_three_v2(my_struct_dict: dict) -> dict:
 
 
 def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
+    '''
+    Просто пишет данные в базу.
+    :param main_dict: Словарь данных из data_constructor
+    :param black_list: Список айдишников пользователя
+    :param add_searcher_data: Доп данные по юзеру, город, имя, фамилия.
+    '''
 
     searcher_id = None
     criterion_city = None
@@ -163,8 +177,6 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
         first = add_searcher_data[2]
         last = add_searcher_data[3]
         criterion_city = add_searcher_data[1]
-
-
 
     if main_dict:
         any_requester = Requester(requester_id=searcher_id, f_name=first, l_name=last)
@@ -199,7 +211,11 @@ def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
 
 def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str = 'hello', attach: str = None):
     '''
-    Пишет в чат чё то
+    Функция отправки всякого в чат.
+    :param token: токен бота
+    :param chat_id: айди чата
+    :param mesaga: сообщение
+    :param attach: приложение к сообщению
     '''
     par = {'access_token': token,
            'v': '5.131',
@@ -211,14 +227,14 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
 
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
     '''Чат'''
     # chat_listener()
     # chat_sender(mesaga='Дороу')
     '''Данные юзера'''
     # print(get_user())
-    print(get_user_v2(user='93600308'))
+    # print(get_user_v2(user='93600308'))
     # print(get_user(user='111189286'))
     # print(get_user(user='763845157'))
     # print(photo_info('93600308'))
