@@ -27,8 +27,6 @@ def chat_listener(token: str = token_soc):
                  f"key={data_dict['response']['key']}&" \
                  f"ts={ts_number}&wait=60&mode=2&version=3"
         response = requests.get(url_lp).json()
-        print(response)
-
 
         for event_list in response['updates']:
 
@@ -57,7 +55,6 @@ def chat_listener(token: str = token_soc):
                 first, last = get_user_first_name(user=searcher_id, token=user_token)
                 chat_sender(chat_id=event_list[3], mesaga=f"Будет исполнено {first}!")
                 answer = event_list[5].split('<br>')
-                print(answer)
 
                 if answer[0][-1] == 'ж':
                     gender = 1
@@ -82,10 +79,11 @@ def chat_listener(token: str = token_soc):
                                         mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
+                    chat_sender(chat_id=event_list[3], mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+
             elif event_list[0] == 4 and user_token and event_list[5].lower() in ['мне', 'для меня']:
                 searcher_id = event_list[6]['from']
                 all_user_data = get_user_v2(user=searcher_id, token=user_token)
-                print(all_user_data)
                 row_age = date.today().year - int(all_user_data['response'][0]['bdate'][-4:])
                 row_city = all_user_data['response'][0]['city']['title']
                 first = all_user_data['response'][0]['first_name']
@@ -110,6 +108,8 @@ def chat_listener(token: str = token_soc):
                                         mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
+                    chat_sender(chat_id=event_list[3], mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+
             elif event_list[0] == 4 and row_city and event_list[5].lower() in ['ещё', 'еще', 'дальше']:
 
                 chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
@@ -129,6 +129,7 @@ def chat_listener(token: str = token_soc):
                                 chat_sender(chat_id=event_list[3],
                                             mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                             attach=f"photo{user_id}_{pers['photo_id']}")
+                        chat_sender(chat_id=event_list[3], mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
 
 
 
