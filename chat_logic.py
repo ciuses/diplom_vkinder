@@ -56,7 +56,7 @@ def chat_listener(token: str = token_soc):
 
             elif event_list[0] == 4 and user_token and event_list[5].startswith('Пол:'):
                 searcher_id = event_list[6]['from']
-                first, last = get_user_first_name(user=searcher_id)
+                first, last = get_user_first_name(user=searcher_id, token=user_token)
                 chat_sender(chat_id=event_list[3], mesaga=f"Будет исполнено {first}!")
                 answer = event_list[5].split('<br>')
                 print(answer)
