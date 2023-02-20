@@ -16,6 +16,7 @@ def get_user_v2(user: str = '7385081', token: str = vk_token):
     resp = requests.get(f'{base_url}users.get', params=par).json()
     return resp
 
+
 def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
     '''
     Получает id, возвращает Имя.
