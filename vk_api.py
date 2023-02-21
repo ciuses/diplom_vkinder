@@ -8,7 +8,7 @@ from db_models import my_session, Black_List, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
 
-def get_user_v2(user: str = '7385081', token: str = vk_token) -> dict:
+def get_user_v2(user: str = '7385081', token: str = token_soc) -> dict:
     '''
     Получает данные юзера по токену.
     :param user: user_id из ВК
@@ -17,19 +17,26 @@ def get_user_v2(user: str = '7385081', token: str = vk_token) -> dict:
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
     resp = requests.get(f'{base_url}users.get', params=par).json()
+
+    if resp.get('error'):
+        print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
+              f'Причина --> {resp.get("error").get("error_msg")}')
+        return False
+
     return resp
 
 
-def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
-    '''
-    Получает id, возвращает Имя.
-    :param token: токен бота
-    :param user: user_id из ВК
-    :return: Имя и Фамилию
-    '''
-    par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
-    resp = requests.get(f'{base_url}users.get', params=par).json()
-    return resp['response'][0]['first_name'], resp['response'][0]['last_name']
+# def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
+#     '''
+#     Получает id, возвращает Имя.
+#     :param token: токен бота
+#     :param user: user_id из ВК
+#     :return: Имя и Фамилию
+#     '''
+#     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
+#     resp = requests.get(f'{base_url}users.get', params=par).json()
+#     # return resp
+#     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
 
 
 def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1, off_num: int = None, city_id: int = None):
@@ -58,7 +65,14 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
 
     resp = requests.get(f'{base_url}users.search', params=par).json()
 
-    if resp.get('response') and len(resp.get('response').get('items')) > 0:
+    # print(resp)
+
+    if resp.get('error'):
+        print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
+              f'Причина --> {resp.get("error").get("error_msg")}')
+        return False
+
+    elif resp.get('response') and len(resp.get('response').get('items')) > 0:
 
         list_of_tupls = [(str_data['id'], str_data['first_name'], str_data['last_name'])
                          for str_data in resp['response']['items']
@@ -74,7 +88,7 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
         return False
 
 
-def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
+def photo_info(user, token: str = None, album: str = 'profile'):
     '''
     Функция запоса аватарки
     :param user: юзер айди
@@ -89,12 +103,18 @@ def photo_info(user, token: str = vk_token, album: str = 'profile') -> dict:
            'extended': 1,
            'photo_sizes': 1}
     resp = requests.get(f'{base_url}photos.get', params=par).json()
+    # print(resp)
 
-    if resp.get('response') and len(resp.get('response').get('items')) > 0:
+    if resp.get('error'):
+        print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
+              f'Причина --> {resp.get("error").get("error_msg")}')
+        return False
+
+    elif resp.get('response') and len(resp.get('response').get('items')) > 0:
         return resp
 
 
-def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
+def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_data=None) -> dict:
     '''
     Основная функция построения даннх по пользователю.
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
@@ -121,19 +141,22 @@ def data_constructor(w_list_b_list_tupl: tuple, additional_data=None) -> dict:
     if w_list_b_list_tupl:
 
         for user_id, f_name, l_name in w_list_b_list_tupl[0]:
-            response_dict = photo_info(user_id)
-            like_comment_photo[user_id] = []
+            response_dict = photo_info(user_id, token=token)
+            if response_dict:
+                like_comment_photo[user_id] = []
 
-            for item in response_dict['response']['items']:
-                like_comment_photo[user_id].append({'likes': item['likes']['count'],
-                                                    'comments': item['comments']['count'],
-                                                    'f_name': f_name,
-                                                    'l_name': l_name,
-                                                    'photo_id': item['id'],
-                                                    'link': item['sizes'][-1]['url']})
+                for item in response_dict['response']['items']:
+                    like_comment_photo[user_id].append({'likes': item['likes']['count'],
+                                                        'comments': item['comments']['count'],
+                                                        'f_name': f_name,
+                                                        'l_name': l_name,
+                                                        'photo_id': item['id'],
+                                                        'link': item['sizes'][-1]['url']})
 
-
-            time.sleep(0.5)
+                time.sleep(0.5)
+            else:
+                print('Ничего нет у этого юзера')
+                continue
 
 
         db_writer(black_list=w_list_b_list_tupl[1], main_dict=like_comment_photo, add_searcher_data=additional_data)
@@ -225,3 +248,6 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
            'random_id': randrange(10 ** 7)}
     requests.post(f'{base_url}messages.send', params=par).json()
 
+if __name__ == '__main__':
+    # print(get_user_first_name(user='610757410'))
+    print(get_user_v2(user='610757410', token=token_soc))
