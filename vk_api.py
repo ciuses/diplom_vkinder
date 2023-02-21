@@ -16,7 +16,13 @@ def get_user_v2(user: str = '7385081', token: str = token_soc) -> dict:
     :return: данные пользователя
     '''
     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
-    resp = requests.get(f'{base_url}users.get', params=par).json()
+
+    try:
+        resp = requests.get(f'{base_url}users.get', params=par).json()
+    except ConnectionError as con:
+        print('Ошибка соединения с API.', con)
+    except Exception as other:
+        print(other)
 
     if resp.get('error'):
         print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
@@ -63,9 +69,12 @@ def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1,
            'relation': '6',  # 0, 1, 5, 6
            'has_photo': '1'}
 
-    resp = requests.get(f'{base_url}users.search', params=par).json()
-
-    # print(resp)
+    try:
+        resp = requests.get(f'{base_url}users.search', params=par).json()
+    except ConnectionError as con:
+        print('Ошибка соединения с API.', con)
+    except Exception as other:
+        print(other)
 
     if resp.get('error'):
         print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
@@ -102,9 +111,14 @@ def photo_info(user, token: str = None, album: str = 'profile'):
            'album_id': album,
            'extended': 1,
            'photo_sizes': 1}
-    resp = requests.get(f'{base_url}photos.get', params=par).json()
-    # print(resp)
+    try:
+        resp = requests.get(f'{base_url}photos.get', params=par).json()
+    except ConnectionError as con:
+        print('Ошибка соединения с API.', con)
+    except Exception as other:
+        print(other)
 
+    # print(resp)
     if resp.get('error'):
         print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
               f'Причина --> {resp.get("error").get("error_msg")}')
@@ -114,7 +128,7 @@ def photo_info(user, token: str = None, album: str = 'profile'):
         return resp
 
 
-def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_data=None) -> dict:
+def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_data=None):
     '''
     Основная функция построения даннх по пользователю.
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
@@ -145,7 +159,7 @@ def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_da
             if response_dict:
                 like_comment_photo[user_id] = []
 
-                for item in response_dict['response']['items']:
+                for item in response_dict.get('response').get('items'):
                     like_comment_photo[user_id].append({'likes': item['likes']['count'],
                                                         'comments': item['comments']['count'],
                                                         'f_name': f_name,
@@ -154,14 +168,18 @@ def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_da
                                                         'link': item['sizes'][-1]['url']})
 
                 time.sleep(0.5)
+
             else:
-                print('Ничего нет у этого юзера')
+                print(f'Ничего нет у этого юзера {user_id}')
+                time.sleep(0.5)
                 continue
 
-
         db_writer(black_list=w_list_b_list_tupl[1], main_dict=like_comment_photo, add_searcher_data=additional_data)
+        # print(like_comment_photo)
         return like_comment_photo
 
+    else:
+        print('Нет списка юзеров.')
 
 def top_three_v2(my_struct_dict: dict) -> dict:
     '''
@@ -170,16 +188,20 @@ def top_three_v2(my_struct_dict: dict) -> dict:
     :return: список тьюплов вида (346034388, {'likes': 4, 'comments': 0, 'link': 'https://}),
                                 (107342491, {'likes': 982, 'comments': 3, 'link': 'https://})
     '''
-    top_dict = {}
-    for user_id, lk_com_li in my_struct_dict.items():
-        sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'), reverse=True)
+    if my_struct_dict:
+        top_dict = {}
+        for user_id, lk_com_li in my_struct_dict.items():
+            sorted_list_of_dicts = sorted(lk_com_li, key=itemgetter('likes'), reverse=True)
 
-        if len(sorted_list_of_dicts) > 3:
-            top_dict[user_id] = sorted_list_of_dicts[:3]
-        else:
-            top_dict[user_id] = sorted_list_of_dicts
+            if len(sorted_list_of_dicts) > 3:
+                top_dict[user_id] = sorted_list_of_dicts[:3]
+            else:
+                top_dict[user_id] = sorted_list_of_dicts
 
-    return top_dict
+        return top_dict
+
+    else:
+        print(my_struct_dict)
 
 
 def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
@@ -246,8 +268,15 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
            'message': mesaga,
            'attachment': attach,
            'random_id': randrange(10 ** 7)}
-    requests.post(f'{base_url}messages.send', params=par).json()
+    try:
+        requests.post(f'{base_url}messages.send', params=par).json()
+    except ConnectionError as con:
+        print('Ошибка соединения с API.', con)
+    except Exception as other:
+        print(other)
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
     # print(get_user_first_name(user='610757410'))
-    print(get_user_v2(user='610757410', token=token_soc))
+    # print(get_user_v2(user='610757410', token=token_soc))
+    # print(get_user_v2(user='190925331', token=token_soc))
+    # print(photo_info(user=50465142, token=vk_token))

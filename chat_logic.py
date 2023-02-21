@@ -8,8 +8,13 @@ def chat_listener(token: str = token_soc):
     Основная функция чат-бота.
     '''
     url = f'{base_url}messages.getLongPollServer'
-    data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
-    ts_number = data_dict['response']['ts']
+    try:
+        data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
+    except ConnectionError as con:
+        print('Ошибка соединения с API.', con)
+    except Exception as other:
+        print(other)
+    ts_number = data_dict.get('response').get('ts')
     searcher_id = None
     user_token = None
     answer = None
@@ -23,10 +28,15 @@ def chat_listener(token: str = token_soc):
 
     while True:
 
-        url_lp = f"https://{data_dict['response']['server']}?act=a_check&" \
-                 f"key={data_dict['response']['key']}&" \
+        url_lp = f"https://{data_dict.get('response').get('server')}?act=a_check&" \
+                 f"key={data_dict.get('response').get('key')}&" \
                  f"ts={ts_number}&wait=60&mode=2&version=3"
-        response = requests.get(url_lp).json()
+        try:
+            response = requests.get(url_lp).json()
+        except ConnectionError as con:
+            print('Ошибка соединения с API.', con)
+        except Exception as other:
+            print(other)
 
         # print(response)
 
@@ -146,14 +156,16 @@ def chat_listener(token: str = token_soc):
                         all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher_id, row_city, first, last))
                         persons = top_three_v2(all_data_dict)
 
-                        for user_id, person in persons.items():
-                            message1 = f"Профиль: https://vk.com/id{user_id}"
-                            chat_sender(chat_id=event_list[3], mesaga=message1)
-                            for pers in person:
-                                chat_sender(chat_id=event_list[3],
-                                            mesaga=f"{pers['f_name']} {pers['l_name']}\n",
-                                            attach=f"photo{user_id}_{pers['photo_id']}")
-                        chat_sender(chat_id=event_list[3], mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                        if persons:
+
+                            for user_id, person in persons.items():
+                                message1 = f"Профиль: https://vk.com/id{user_id}"
+                                chat_sender(chat_id=event_list[3], mesaga=message1)
+                                for pers in person:
+                                    chat_sender(chat_id=event_list[3],
+                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                                attach=f"photo{user_id}_{pers['photo_id']}")
+                            chat_sender(chat_id=event_list[3], mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
 
                     else:
                         chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
