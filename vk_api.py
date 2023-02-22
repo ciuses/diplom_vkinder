@@ -32,19 +32,6 @@ def get_user_v2(user: str = '7385081', token: str = token_soc) -> dict:
     return resp
 
 
-# def get_user_first_name(token: str = token_soc, user: str = '7385081') -> tuple:
-#     '''
-#     Получает id, возвращает Имя.
-#     :param token: токен бота
-#     :param user: user_id из ВК
-#     :return: Имя и Фамилию
-#     '''
-#     par = {'access_token': token, 'v': '5.131', 'user_ids': user, 'fields': 'bdate, city, sex'}
-#     resp = requests.get(f'{base_url}users.get', params=par).json()
-#     # return resp
-#     return resp['response'][0]['first_name'], resp['response'][0]['last_name']
-
-
 def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1, off_num: int = None, city_id: int = None):
     '''
     Ищет пользователей контача по критериям
@@ -128,7 +115,7 @@ def photo_info(user, token: str = None, album: str = 'profile'):
         return resp
 
 
-def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_data=None):
+def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_data=None) -> dict:
     '''
     Основная функция построения даннх по пользователю.
     :param w_list_b_list_tupl: [606233587, 44151122, 138103064]
@@ -156,6 +143,7 @@ def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_da
 
         for user_id, f_name, l_name in w_list_b_list_tupl[0]:
             response_dict = photo_info(user_id, token=token)
+
             if response_dict:
                 like_comment_photo[user_id] = []
 
@@ -180,6 +168,7 @@ def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_da
 
     else:
         print('Нет списка юзеров.')
+
 
 def top_three_v2(my_struct_dict: dict) -> dict:
     '''
