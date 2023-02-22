@@ -1,5 +1,5 @@
-from datetime import date
 import requests
+from datetime import date
 from token_other import vk_token_soc as token_soc
 from vk_api import user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
 
@@ -124,7 +124,7 @@ def chat_listener(token: str = token_soc):
                         else:
                             gender = 1
 
-                        search_results = user_search(age=str(row_age), city=row_city, sex=gender)
+                        search_results = user_search(age=str(row_age), city=row_city, sex=gender, token=user_token)
                         if search_results:
                             all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher_id, row_city, first, last))
                             persons = top_three_v2(all_data_dict)
@@ -150,7 +150,7 @@ def chat_listener(token: str = token_soc):
                     chat_sender(chat_id=event_list[3], mesaga=f"Ок, поищу!")
                     off += 3
 
-                    search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off)
+                    search_results = user_search(age=row_age, city=row_city, sex=gender, off_num=off, token=user_token)
 
                     if search_results:
                         all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher_id, row_city, first, last))

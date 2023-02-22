@@ -1,9 +1,8 @@
 import time
 import requests
 from random import randrange
-from token_other import vk_access_token as vk_token
-from token_other import vk_token_soc as token_soc
 from operator import itemgetter
+from token_other import vk_token_soc as token_soc
 from db_models import my_session, Black_List, Users, Photos, Requester
 
 base_url = 'https://api.vk.com/method/'
@@ -32,7 +31,7 @@ def get_user_v2(user: str = '7385081', token: str = token_soc) -> dict:
     return resp
 
 
-def user_search(age: str, city: str = None, token: str = vk_token, sex: int = 1, off_num: int = None, city_id: int = None):
+def user_search(age: str, city: str = None, token: str = None, sex: int = 1, off_num: int = None, city_id: int = None):
     '''
     Ищет пользователей контача по критериям
     :param age: Возраст
@@ -160,7 +159,7 @@ def data_constructor(w_list_b_list_tupl: tuple, token: str = None, additional_da
             else:
                 print(f'Ничего нет у этого юзера {user_id}')
                 time.sleep(0.5)
-                continue
+                # continue
 
         db_writer(black_list=w_list_b_list_tupl[1], main_dict=like_comment_photo, add_searcher_data=additional_data)
         # print(like_comment_photo)
@@ -190,7 +189,7 @@ def top_three_v2(my_struct_dict: dict) -> dict:
         return top_dict
 
     else:
-        print(my_struct_dict)
+        print('Словарь пришёл на сортировку', my_struct_dict)
 
 
 def db_writer(main_dict=None, black_list=None, add_searcher_data=None):
