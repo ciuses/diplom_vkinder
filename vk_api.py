@@ -270,3 +270,6 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
     except Exception as other:
         print(other)
         return False
+
+
+#
