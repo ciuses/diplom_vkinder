@@ -20,8 +20,10 @@ def get_user_v2(user: str = '7385081', token: str = token_soc) -> dict:
         resp = requests.get(f'{base_url}users.get', params=par).json()
     except ConnectionError as con:
         print('Ошибка соединения с API.', con)
+        return False
     except Exception as other:
         print(other)
+        return False
 
     if resp.get('error'):
         print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
@@ -59,8 +61,10 @@ def user_search(age: str, city: str = None, token: str = None, sex: int = 1, off
         resp = requests.get(f'{base_url}users.search', params=par).json()
     except ConnectionError as con:
         print('Ошибка соединения с API.', con)
+        return False
     except Exception as other:
         print(other)
+        return False
 
     if resp.get('error'):
         print(f'Код ошибки --> {resp.get("error").get("error_code")}, '
@@ -101,8 +105,10 @@ def photo_info(user, token: str = None, album: str = 'profile'):
         resp = requests.get(f'{base_url}photos.get', params=par).json()
     except ConnectionError as con:
         print('Ошибка соединения с API.', con)
+        return False
     except Exception as other:
         print(other)
+        return False
 
     # print(resp)
     if resp.get('error'):
@@ -260,11 +266,7 @@ def chat_sender(token: str = token_soc, chat_id: str = '2000000001', mesaga: str
         requests.post(f'{base_url}messages.send', params=par).json()
     except ConnectionError as con:
         print('Ошибка соединения с API.', con)
+        return False
     except Exception as other:
         print(other)
-
-# if __name__ == '__main__':
-    # print(get_user_first_name(user='610757410'))
-    # print(get_user_v2(user='610757410', token=token_soc))
-    # print(get_user_v2(user='190925331', token=token_soc))
-    # print(photo_info(user=50465142, token=vk_token))
+        return False

@@ -8,12 +8,14 @@ def chat_listener(token: str = token_soc):
     Основная функция чат-бота.
     '''
     url = f'{base_url}messages.getLongPollServer'
+
     try:
         data_dict = requests.get(url, params={'access_token': token, 'v': '5.131', 'lp_version': '3'}).json()
     except ConnectionError as con:
         print('Ошибка соединения с API.', con)
     except Exception as other:
         print(other)
+
     ts_number = data_dict.get('response').get('ts')
     searcher_id = None
     user_token = None
@@ -35,14 +37,17 @@ def chat_listener(token: str = token_soc):
             response = requests.get(url_lp).json()
         except ConnectionError as con:
             print('Ошибка соединения с API.', con)
+            continue
         except Exception as other:
             print(other)
+            continue
 
-        # print(response)
+        print(response)
 
         if response.get('error'):
             print(f'Код ошибки --> {response.get("error").get("error_code")}, '
                   f'Причина --> {response.get("error").get("error_msg")}')
+            continue
 
         elif response.get('updates'):
 
@@ -64,7 +69,7 @@ def chat_listener(token: str = token_soc):
                         print('Что-то пошло не так при получении данных пользователя из API.')
                         continue
 
-                elif event_list[0] == 4 and searcher_id and first and event_list[5].startswith('Мой токен: vk1.a.5'):
+                elif event_list[0] == 4 and searcher_id and first and event_list[5].startswith('Мой токен: vk1.a.'):
                     row_user_token = event_list[5]
                     u_token = row_user_token.split()[2]
 
@@ -171,6 +176,9 @@ def chat_listener(token: str = token_soc):
                         chat_sender(chat_id=event_list[3], mesaga=f"Больше нету! :(")
 
             ts_number = response['ts']
+
+        else:
+            continue
 
 
 
