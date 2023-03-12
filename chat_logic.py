@@ -1,7 +1,7 @@
 import requests
 from datetime import date
 from token_other import vk_token_soc as token_soc
-from vk_api import user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
+from vk_api_metods import user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
 
 def chat_listener(token: str = token_soc):
     '''
