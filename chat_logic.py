@@ -239,7 +239,10 @@ def main_logic():
                     # print(search_results)
 
                     if search_results:
-                        all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher, city, f_name, l_name))
+                        all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher,
+                                                                                                            city,
+                                                                                                            f_name,
+                                                                                                            l_name))
                         persons = top_three_v2(all_data_dict)
 
                         for user_id, person in persons.items():
@@ -306,8 +309,8 @@ def main_logic():
 
                 search_results = user_search(age=age, city=city, sex=gender, token=user_token)
                 if search_results:
-                    all_data_dict = data_constructor(search_results, token=user_token,
-                                                     additional_data=(searcher, city, f_name, l_name))
+                    all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher, city,
+                                                                                                        f_name, l_name))
                     persons = top_three_v2(all_data_dict)
                     for user_id, person in persons.items():
                         message1 = f"Профиль: https://vk.com/id{user_id}"
