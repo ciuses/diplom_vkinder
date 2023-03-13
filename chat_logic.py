@@ -291,6 +291,39 @@ def main_logic():
                 else:
                     continue
 
+            if events.type == VkEventType.MESSAGE_NEW and events.text.startswith('Пол:'):
+
+                chat_sender(chat_id=chat, mesaga=f"Будет исполнено {f_name}!")
+                answer = events.text.split('\n')
+
+                if answer[0][-1] == 'ж':
+                    gender = 1
+                elif answer[0][-1] == 'м':
+                    gender = 2
+                else:
+                    gender = 1
+
+                city = answer[2][7:]
+                age = answer[1][-2:]
+
+                search_results = user_search(age=age, city=city, sex=gender, token=user_token)
+                if search_results:
+                    all_data_dict = data_constructor(search_results, token=user_token,
+                                                     additional_data=(searcher, city, f_name, l_name))
+                    persons = top_three_v2(all_data_dict)
+                    for user_id, person in persons.items():
+                        message1 = f"Профиль: https://vk.com/id{user_id}"
+                        chat_sender(chat_id=chat, mesaga=message1)
+                        for pers in person:
+                            chat_sender(chat_id=chat,
+                                        mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                        attach=f"photo{user_id}_{pers['photo_id']}")
+
+                    chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                else:
+                    print('Что-то пошло не так при поиске кандидатов.')
+                    continue
+
 
 
 if __name__ == '__main__':
