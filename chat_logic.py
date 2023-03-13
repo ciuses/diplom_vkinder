@@ -186,8 +186,6 @@ def chat_listener(token: str = token_soc):
 def main_logic():
 
     vk = vk_api.VkApi(token=token_soc)
-    vk2 = vk_api.VkApi(token=user_token)
-
     longpoll = VkLongPoll(vk)
 
     f_name = None
@@ -206,13 +204,10 @@ def main_logic():
 
             if events.type == VkEventType.MESSAGE_NEW and events.text not in ['мне', 'для меня', 'ещё', 'еще', 'дальше']:
                 print(events.text)
-                # print(events.chat_id)
                 chat = 2000000000 + events.chat_id
                 searcher = events.user_id
 
                 user_data = get_user_v2(user=searcher, token=token_soc)
-
-                print(user_data)
 
                 if user_data['response']:
                     f_name, l_name = user_data['response'][0]['first_name'], user_data['response'][0]['last_name']
@@ -229,7 +224,7 @@ def main_logic():
                         chat_sender(token=token_soc, chat_id=chat, mesaga='Мало данных о тебе!')
                         continue
 
-                    print(f_name, l_name, gender, city, age)
+                    # print(f_name, l_name, gender, city, age)
                     chat_sender(token=token_soc, chat_id=chat, mesaga=f'Привет {f_name} {l_name}')
 
                 else:
@@ -241,7 +236,7 @@ def main_logic():
 
                 if gender and city and age:
                     search_results = user_search(age=str(age), city=city, sex=gender, token=user_token)
-                    print(search_results)
+                    # print(search_results)
 
                     if search_results:
                         all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher, city, f_name, l_name))
@@ -260,6 +255,9 @@ def main_logic():
                         continue
 
                 else:
+                    chat_sender(token=token_soc, chat_id=chat, mesaga=f'{f_name} нехватает данных для поиска. '
+                                                                      f'Введите критерии в следующем формате:\n\n\n'
+                                                                      f'Пол: ж\nВозраст: 27\nГород: Томск\n\n\n')
                     continue
 
             elif events.type == VkEventType.MESSAGE_NEW and events.text in ['ещё', 'еще', 'дальше']:
