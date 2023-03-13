@@ -1,6 +1,9 @@
 import requests
 from datetime import date
+import vk_api
+from vk_api.longpoll import VkLongPoll, VkEventType
 from token_other import vk_token_soc as token_soc
+from token_other import vk_access_token as user_token
 from vk_api_metods import user_search, top_three_v2, data_constructor, base_url, chat_sender, get_user_v2
 
 def chat_listener(token: str = token_soc):
@@ -180,7 +183,82 @@ def chat_listener(token: str = token_soc):
         else:
             continue
 
+def main_logic():
+
+    vk = vk_api.VkApi(token=token_soc)
+    vk2 = vk_api.VkApi(token=user_token)
+
+    longpoll = VkLongPoll(vk)
+
+    f_name = None
+    l_name = None
+    chat = None
+    gender = None
+    city = None
+    age = None
+    searcher = None
+
+    while True:
+
+        for events in longpoll.listen():
+            print(events.type)
+
+            if events.type == VkEventType.MESSAGE_NEW and events.text not in ['мне', 'для меня']:
+                print(events.text)
+                # print(events.chat_id)
+                chat = 2000000000 + events.chat_id
+                searcher = events.user_id
+
+                user_data = get_user_v2(user=searcher, token=token_soc)
+
+                print(user_data)
+
+                if user_data['response']:
+                    f_name, l_name = user_data['response'][0]['first_name'], user_data['response'][0]['last_name']
+                    try:
+                        gender = 3 - user_data['response'][0]['sex']
+                        city = user_data['response'][0]['city']['title']
+                        age = date.today().year - int(user_data['response'][0]['bdate'][-4:])
+                    except KeyError as key:
+                        print(key)
+                        chat_sender(token=token_soc, chat_id=chat, mesaga='Мало данных о тебе!')
+                        continue
+                    except IndexError as index:
+                        print(index)
+                        chat_sender(token=token_soc, chat_id=chat, mesaga='Мало данных о тебе!')
+                        continue
+
+                    print(f_name, l_name, gender, city, age)
+                    chat_sender(token=token_soc, chat_id=chat, mesaga=f'Привет {f_name} {l_name}')
+
+                else:
+                    continue
+
+            elif events.type == VkEventType.MESSAGE_NEW and events.text in ['мне', 'для меня']:
+                chat_sender(token=token_soc, chat_id=chat, mesaga=f'{f_name} пойду искать...')
+
+                if gender and city and age:
+                    search_results = user_search(age=str(age), city=city, sex=gender, token=user_token)
+                    print(search_results)
+
+                    if search_results:
+                        all_data_dict = data_constructor(search_results, token=user_token, additional_data=(searcher, city, f_name, l_name))
+                        persons = top_three_v2(all_data_dict)
+
+                        for user_id, person in persons.items():
+                            message1 = f"Профиль: https://vk.com/id{user_id}"
+                            chat_sender(chat_id=chat, mesaga=message1)
+                            for pers in person:
+                                chat_sender(chat_id=chat,
+                                            mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                            attach=f"photo{user_id}_{pers['photo_id']}")
+                        chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                    else:
+                        print('Что-то пошло не так при поиске кандидатов.')
+                        continue
+
 
 
 if __name__ == '__main__':
-    chat_listener()
+    # chat_listener()
+    main_logic()
