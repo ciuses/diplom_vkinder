@@ -197,13 +197,14 @@ def main_logic():
     city = None
     age = None
     searcher = None
+    off = 0
 
     while True:
 
         for events in longpoll.listen():
             print(events.type)
 
-            if events.type == VkEventType.MESSAGE_NEW and events.text not in ['мне', 'для меня']:
+            if events.type == VkEventType.MESSAGE_NEW and events.text not in ['мне', 'для меня', 'ещё', 'еще', 'дальше']:
                 print(events.text)
                 # print(events.chat_id)
                 chat = 2000000000 + events.chat_id
@@ -235,6 +236,7 @@ def main_logic():
                     continue
 
             elif events.type == VkEventType.MESSAGE_NEW and events.text in ['мне', 'для меня']:
+
                 chat_sender(token=token_soc, chat_id=chat, mesaga=f'{f_name} пойду искать...')
 
                 if gender and city and age:
@@ -256,6 +258,38 @@ def main_logic():
                     else:
                         print('Что-то пошло не так при поиске кандидатов.')
                         continue
+
+                else:
+                    continue
+
+            elif events.type == VkEventType.MESSAGE_NEW and events.text in ['ещё', 'еще', 'дальше']:
+
+                chat_sender(chat_id=chat, mesaga=f"Ок, поищу!")
+                off += 3
+
+                if gender and city and age:
+                    search_results = user_search(age=age, city=city, sex=gender, off_num=off, token=user_token)
+
+                    if search_results:
+                        all_data_dict = data_constructor(search_results, token=user_token,
+                                                         additional_data=(searcher, city, f_name, l_name))
+                        persons = top_three_v2(all_data_dict)
+
+                        if persons:
+
+                            for user_id, person in persons.items():
+                                message1 = f"Профиль: https://vk.com/id{user_id}"
+                                chat_sender(chat_id=chat, mesaga=message1)
+                                for pers in person:
+                                    chat_sender(chat_id=chat,
+                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                                attach=f"photo{user_id}_{pers['photo_id']}")
+                            chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+
+                    else:
+                        chat_sender(chat_id=chat, mesaga=f"Больше нету! :(")
+                else:
+                    continue
 
 
 
