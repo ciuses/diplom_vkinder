@@ -204,7 +204,7 @@ def main_logic():
 
             if events.type == VkEventType.MESSAGE_NEW and events.text not in ['мне', 'для меня', 'ещё', 'еще', 'дальше']:
                 print(events.text)
-                chat = 2000000000 + events.chat_id
+                # chat = 2000000000 + events.chat_id
                 searcher = events.user_id
 
                 user_data = get_user_v2(user=searcher, token=token_soc)
@@ -217,22 +217,22 @@ def main_logic():
                         age = date.today().year - int(user_data['response'][0]['bdate'][-4:])
                     except KeyError as key:
                         print(key)
-                        chat_sender(token=token_soc, chat_id=chat, mesaga='Мало данных о тебе!')
+                        chat_sender(token=token_soc, mesaga='Мало данных о тебе!')
                         continue
                     except IndexError as index:
                         print(index)
-                        chat_sender(token=token_soc, chat_id=chat, mesaga='Мало данных о тебе!')
+                        chat_sender(token=token_soc, mesaga='Мало данных о тебе!')
                         continue
 
                     # print(f_name, l_name, gender, city, age)
-                    chat_sender(token=token_soc, chat_id=chat, mesaga=f'Привет {f_name} {l_name}')
+                    chat_sender(token=token_soc, mesaga=f'Привет {f_name} {l_name}')
 
                 else:
                     continue
 
             elif events.type == VkEventType.MESSAGE_NEW and events.text in ['мне', 'для меня']:
 
-                chat_sender(token=token_soc, chat_id=chat, mesaga=f'{f_name} пойду искать...')
+                chat_sender(token=token_soc, mesaga=f'{f_name} пойду искать...')
 
                 if gender and city and age:
                     search_results = user_search(age=str(age), city=city, sex=gender, token=user_token)
@@ -247,25 +247,24 @@ def main_logic():
 
                         for user_id, person in persons.items():
                             message1 = f"Профиль: https://vk.com/id{user_id}"
-                            chat_sender(chat_id=chat, mesaga=message1)
+                            chat_sender(mesaga=message1)
                             for pers in person:
-                                chat_sender(chat_id=chat,
-                                            mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                             attach=f"photo{user_id}_{pers['photo_id']}")
-                        chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                        chat_sender(mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
                     else:
                         print('Что-то пошло не так при поиске кандидатов.')
                         continue
 
                 else:
-                    chat_sender(token=token_soc, chat_id=chat, mesaga=f'{f_name} нехватает данных для поиска. '
+                    chat_sender(token=token_soc, mesaga=f'{f_name} нехватает данных для поиска. '
                                                                       f'Введите критерии в следующем формате:\n\n\n'
                                                                       f'Пол: ж\nВозраст: 27\nГород: Томск\n\n\n')
                     continue
 
             elif events.type == VkEventType.MESSAGE_NEW and events.text in ['ещё', 'еще', 'дальше']:
 
-                chat_sender(chat_id=chat, mesaga=f"Ок, поищу!")
+                chat_sender(mesaga=f"Ок, поищу!")
                 off += 3
 
                 if gender and city and age:
@@ -280,21 +279,20 @@ def main_logic():
 
                             for user_id, person in persons.items():
                                 message1 = f"Профиль: https://vk.com/id{user_id}"
-                                chat_sender(chat_id=chat, mesaga=message1)
+                                chat_sender(mesaga=message1)
                                 for pers in person:
-                                    chat_sender(chat_id=chat,
-                                                mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                                    chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                                 attach=f"photo{user_id}_{pers['photo_id']}")
-                            chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                            chat_sender(mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
 
                     else:
-                        chat_sender(chat_id=chat, mesaga=f"Больше нету! :(")
+                        chat_sender(mesaga=f"Больше нету! :(")
                 else:
                     continue
 
             if events.type == VkEventType.MESSAGE_NEW and events.text.startswith('Пол:'):
 
-                chat_sender(chat_id=chat, mesaga=f"Будет исполнено {f_name}!")
+                chat_sender(mesaga=f"Будет исполнено {f_name}!")
                 answer = events.text.split('\n')
 
                 if answer[0][-1] == 'ж':
@@ -314,13 +312,12 @@ def main_logic():
                     persons = top_three_v2(all_data_dict)
                     for user_id, person in persons.items():
                         message1 = f"Профиль: https://vk.com/id{user_id}"
-                        chat_sender(chat_id=chat, mesaga=message1)
+                        chat_sender(mesaga=message1)
                         for pers in person:
-                            chat_sender(chat_id=chat,
-                                        mesaga=f"{pers['f_name']} {pers['l_name']}\n",
+                            chat_sender(mesaga=f"{pers['f_name']} {pers['l_name']}\n",
                                         attach=f"photo{user_id}_{pers['photo_id']}")
 
-                    chat_sender(chat_id=chat, mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
+                    chat_sender(mesaga=f"Напиши: ещё, еще, дальше, что бы продолжить.")
                 else:
                     print('Что-то пошло не так при поиске кандидатов.')
                     continue
